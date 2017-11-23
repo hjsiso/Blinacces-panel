@@ -1,45 +1,25 @@
 import React, { Component } from 'react';
-import Chart from 'chart.js';
+import firebase from '../../firebase';
+
+import ChartSales from '../../components/ChartSales';
+import ChartUsers from '../../components/ChartUsers';
 
 class Dashboard extends Component {
+  constructor() {
+    super()
+    this.state = {
+      categoryCount: 0
+    }
+
+  }
 
   componentDidMount() {
-    var ctx = document.getElementById("myChart");
-    var myChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun"],
-        datasets: [{
-          label: '# Pedidos',
-          data: [12, 19, 31, 15, 23, 3],
-          backgroundColor: [
-            'rgba(54, 162, 235, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(54, 162, 235, 1)'
-          ],
-          borderColor: [
-            'rgba(54, 162, 235, 3)',
-            'rgba(54, 162, 235, 3)',
-            'rgba(54, 162, 235, 3)',
-            'rgba(54, 162, 235, 3)',
-            'rgba(54, 162, 235, 3)',
-            'rgba(54, 162, 235, 3)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        scales: {
-          yAxes: [{
-            ticks: {
-              beginAtZero: true
-            }
-          }]
-        }
-      }
+    const itemsRef = firebase.database().ref('categories');
+    itemsRef.on('value', (snapshot) => {
+      let count = snapshot.numChildren();
+      this.setState({
+        categoryCount: count
+      });
     });
   }
 
@@ -52,10 +32,10 @@ class Dashboard extends Component {
               <div className="card-block p-1 clearfix">
                 <i className="fa fa-user bg-info p-1 font-2xl mr-1 float-left"></i>
                 <div className="h5 text-info mb-0 mt-h">8</div>
-                <div className="text-muted text-uppercase font-weight-bold font-xs">Usuarios</div>
+                <div className="text-muted text-uppercase font-weight-bold font-xs">Clientes</div>
               </div>
               <div className="card-footer p-x-1 py-h">
-                <a className="font-weight-bold font-xs btn-block text-muted" href="#/users">Ver Más <i className="fa fa-angle-right float-right font-lg"></i></a>
+                <a className="font-weight-bold font-xs btn-block text-muted" href="#/customers">Ver Más <i className="fa fa-angle-right float-right font-lg"></i></a>
               </div>
             </div>
           </div>
@@ -75,11 +55,11 @@ class Dashboard extends Component {
             <div className="card">
               <div className="card-block p-1 clearfix">
                 <i className="fa fa-puzzle-piece bg-warning p-1 font-2xl mr-1 float-left"></i>
-                <div className="h5 text-warning mb-0 mt-h">7</div>
+                <div className="h5 text-warning mb-0 mt-h">{this.state.categoryCount}</div>
                 <div className="text-muted text-uppercase font-weight-bold font-xs">Categorias</div>
               </div>
               <div className="card-footer p-x-1 py-h">
-                <a className="font-weight-bold font-xs btn-block text-muted" href="#">Ver Más <i className="fa fa-angle-right float-right font-lg"></i></a>
+                <a className="font-weight-bold font-xs btn-block text-muted" href="#/categories">Ver Más <i className="fa fa-angle-right float-right font-lg"></i></a>
               </div>
             </div>
           </div>
@@ -96,8 +76,8 @@ class Dashboard extends Component {
             </div>
           </div>
         </div>
-
-        <canvas id="myChart" width="400" height="150"></canvas>
+        <ChartSales />
+        <ChartUsers />
       </div>
     )
 

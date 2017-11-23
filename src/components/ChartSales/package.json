@@ -1,0 +1,6 @@
+{
+  "name": "ChartSales",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./ChartSales.js"
+}
