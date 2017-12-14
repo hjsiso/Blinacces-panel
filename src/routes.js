@@ -3,7 +3,8 @@ const routes = {
   '/dashboard': 'Dashboard',
   '/orders': 'Orders',
   '/customers': 'Customers',
-  '/categories': 'Categories'
+  '/categories': 'Categories',
+  '/products': 'Products'
 };
 
 export default routes;

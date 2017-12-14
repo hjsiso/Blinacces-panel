@@ -1,16 +1,13 @@
-
 import firebase from 'firebase'
+const config = {
+  apiKey: "AIzaSyB564e_AfQ8RFT9bp17ZhnZAUXvE5SoC08",
+  authDomain: "blindaccesapp.firebaseapp.com",
+  databaseURL: "https://blindaccesapp.firebaseio.com",
+  projectId: "blindaccesapp",
+  storageBucket: "blindaccesapp.appspot.com",
+  messagingSenderId: "176221302114"
+};
 
-// Initialize Firebase
-var config = {
-    apiKey: "",
-    authDomain: "blindaccesapp.firebaseapp.com",
-    databaseURL: "https://blindaccesapp.firebaseio.com",
-    projectId: "blindaccesapp",
-    storageBucket: "blindaccesapp.appspot.com",
-    messagingSenderId: ""
-  };
-  
-  firebase.initializeApp(config);
- 
-  export default firebase;
+firebase.initializeApp(config);
+
+export default firebase;

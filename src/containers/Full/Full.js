@@ -11,6 +11,7 @@ import Dashboard from '../../views/Dashboard/';
 import Orders from '../../views/Orders'; 
 import Customers from '../../views/Customers';
 import Categories from '../../views/Categories';
+import Products from '../../views/Products';
 
 class Full extends Component {
   render() {
@@ -27,6 +28,7 @@ class Full extends Component {
                 <Route path="/orders" name="Orders" component={Orders}/>
                 <Route path="/customers" name="Customers" component={Customers}/>
                 <Route path="/categories" name="Categories" component={Categories}/>
+                <Route path="/products" name="Products" component={Products}/>
                 <Redirect from="/" to="/dashboard"/>
               </Switch>
             </Container>

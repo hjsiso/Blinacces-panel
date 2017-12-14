@@ -8,17 +8,26 @@ class Dashboard extends Component {
   constructor() {
     super()
     this.state = {
-      categoryCount: 0
+      categoryCount: 0,
+      productsCount:0
     }
 
   }
 
   componentDidMount() {
-    const itemsRef = firebase.database().ref('categories');
-    itemsRef.on('value', (snapshot) => {
+    const itemsRef = firebase.database().ref('/');
+    
+    itemsRef.child("categories").on('value', (snapshot) => {
       let count = snapshot.numChildren();
       this.setState({
         categoryCount: count
+      });
+    });
+
+    itemsRef.child("products").on('value', (snapshot) => {
+      let count = snapshot.numChildren();
+      this.setState({
+        productsCount: count
       });
     });
   }
@@ -67,11 +76,11 @@ class Dashboard extends Component {
             <div className="card">
               <div className="card-block p-1 clearfix">
                 <i className="fa fa-shopping-bag bg-danger p-1 font-2xl mr-1 float-left"></i>
-                <div className="h5 text-danger mb-0 mt-h">31</div>
+                <div className="h5 text-danger mb-0 mt-h">{this.state.productsCount}</div>
                 <div className="text-muted text-uppercase font-weight-bold font-xs">Productos</div>
               </div>
               <div className="card-footer p-x-1 py-h">
-                <a className="font-weight-bold font-xs btn-block text-muted" href="#">Ver Más <i className="fa fa-angle-right float-right font-lg"></i></a>
+                <a className="font-weight-bold font-xs btn-block text-muted" href="#/products">Ver Más <i className="fa fa-angle-right float-right font-lg"></i></a>
               </div>
             </div>
           </div>

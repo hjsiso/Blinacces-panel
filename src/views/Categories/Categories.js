@@ -45,10 +45,30 @@ class Categories extends Component {
         })
     }
 
+    delItem(item, e) {
+        e.preventDefault();
+        //console.log(item);
+        let category = prompt("Por favor escriba la categoria a eliminar", "");
+
+        if (category == item.categoryName) {
+
+            if (confirm('Seguro que desea eliminar la categoria ' + category + ' ?')) {
+                const itemsRef = firebase.database().ref('categories/' + item.id).remove();
+                this.setState({
+                    currentItem: '',
+                    categoryName: '',
+                    showEditOpts: false
+                })
+            }
+        }
+
+
+    }
+
     updateItem(e) {
         e.preventDefault();
         //console.log(this.state.currentItem);
-        const itemsRef = firebase.database().ref('categories/' + this.state.currentItem).set({
+        const itemsRef = firebase.database().ref('categories/' + this.state.currentItem).update({
             categoryName: this.state.categoryName
         });
         this.setState({
@@ -76,7 +96,8 @@ class Categories extends Component {
         e.preventDefault();
         const itemsRef = firebase.database().ref('categories');
         const item = {
-            categoryName: this.state.categoryName
+            categoryName: this.state.categoryName,
+            visible: true
         }
         itemsRef.push(item);
         this.setState({
@@ -113,7 +134,7 @@ class Categories extends Component {
                                     <td>{item.categoryName}</td>
                                     <td>
                                         <button type="button" className="btn btn-outline-primary btn-sm mr-2 float-right" onClick={(e) => this.editItem(item, e)}><i className="sm icon-pencil" /></button>
-                                        <button type="button" className="btn btn-outline-danger btn-sm mr-2 float-right"><i className="sm icon-trash" /></button>
+                                        <button type="button" className="btn btn-outline-danger btn-sm mr-2 float-right" onClick={(e) => this.delItem(item, e)}><i className="sm icon-trash" /></button>
                                     </td>
                                 </tr>
                             )
@@ -121,25 +142,6 @@ class Categories extends Component {
                     </tbody>
                 </table>
 
-                <nav aria-label="Page navigation example">
-                    <ul className="pagination">
-                        <li className="page-item">
-                            <a className="page-link" href="#" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span className="sr-only">Previous</span>
-                            </a>
-                        </li>
-                        <li className="page-item"><a className="page-link" href="#">1</a></li>
-                        <li className="page-item"><a className="page-link" href="#">2</a></li>
-                        <li className="page-item"><a className="page-link" href="#">3</a></li>
-                        <li className="page-item">
-                            <a className="page-link" href="#" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                                <span className="sr-only">Next</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
 
             </div>
 
