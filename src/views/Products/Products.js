@@ -22,7 +22,6 @@ class Products extends Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeCategory = this.handleChangeCategory.bind(this);
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
-
     }
 
     componentDidMount() {
@@ -56,14 +55,19 @@ class Products extends Component {
 
     handleChange(e) {
         this.setState({
-            currentOrder: e.target.value,
-            items: _.orderBy(this.state.items, e.target.value)
+            currentOrder: e.target.value
+            //items: _.orderBy(this.state.items, e.target.value)
         });
+        this.filterList(this.state.currentCategory, e.target.value, this.state.currentSearch)
 
     }
 
     handleChangeCategory(e) {
-        if (e.target.value == "") {
+        this.setState({
+            currentCategory: e.target.value
+        });
+        this.filterList(e.target.value, this.state.currentOrder, this.state.currentSearch)
+        /*if (e.target.value == "") {
             this.setState({
                 items: _.orderBy(this.state.allItems, this.state.currentOrder)
             });
@@ -75,10 +79,15 @@ class Products extends Component {
             this.setState({
                 items: _.orderBy(tmpItem, this.state.currentOrder)
             });
-        }
+        }*/
     }
 
     handleChangeSearch(e) {
+        this.setState({
+            currentSearch: e.target.value
+        });
+        this.filterList(this.state.currentCategory, this.state.currentOrder, e.target.value)
+        /*
         if (e.target.value == "") {
             this.setState({
                 items: _.orderBy(this.state.allItems, this.state.currentOrder)
@@ -89,7 +98,7 @@ class Products extends Component {
                     e.target.value.toLowerCase()) !== -1;
             });
             this.setState({ items: updatedList });
-        }
+        }*/
     }
 
     loadCategories() {
@@ -114,7 +123,29 @@ class Products extends Component {
 
     }
 
-    filterList(){
+    filterList(category, order, searchString) {
+        let items = this.state.allItems;
+        if (category != "") {
+            items = _.filter(items, (item) => {
+                return item.category == category
+            });
+
+            this.setState({
+                items: items
+            });
+        }
+        if (order != "") {
+            this.setState({
+                items: _.orderBy(items, order)
+            });
+        }
+        if (searchString != "") {
+            items = _.filter(items, (item) => {
+                return item.name.toLowerCase().search(
+                    searchString.toLowerCase()) !== -1;
+            });
+            this.setState({ items: items });
+        }
 
     }
 
@@ -132,6 +163,12 @@ class Products extends Component {
                             <th colSpan="3">
                                 <div className="container">
                                     <div className="row">
+                                        <div className="col col-sm-1">
+                                            ITEMS:
+                                        </div>
+                                        <div className="col col-sm-1">
+                                            <span className="badge badge-pill badge-primary">{this.state.items.length}</span>
+                                        </div>
                                         <div className="col col-sm-2">
                                             CATEGORIA:
                                         </div>
@@ -155,7 +192,7 @@ class Products extends Component {
                                                 <option value="name">Nombre</option>
                                             </select>
                                         </div>
-                                        <div className="col col-sm-4">
+                                        <div className="col col-sm-2">
                                             <input type="text" placeholder="Buscar..." className="form-control form-control-sm" onChange={this.handleChangeSearch} />
                                         </div>
                                     </div>
