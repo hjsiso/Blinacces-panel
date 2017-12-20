@@ -63,7 +63,6 @@ class Products extends Component {
     handleChange(e) {
         this.setState({
             currentOrder: e.target.value
-            //items: _.orderBy(this.state.items, e.target.value)
         });
         this.filterList(this.state.currentCategory, e.target.value, this.state.currentSearch)
 
@@ -74,19 +73,6 @@ class Products extends Component {
             currentCategory: e.target.value
         });
         this.filterList(e.target.value, this.state.currentOrder, this.state.currentSearch)
-        /*if (e.target.value == "") {
-            this.setState({
-                items: _.orderBy(this.state.allItems, this.state.currentOrder)
-            });
-        } else {
-            let tmpItem = _.filter(this.state.allItems, (item) => {
-                return item.category == e.target.value
-            });
-
-            this.setState({
-                items: _.orderBy(tmpItem, this.state.currentOrder)
-            });
-        }*/
     }
 
     handleChangeSearch(e) {
@@ -94,18 +80,6 @@ class Products extends Component {
             currentSearch: e.target.value
         });
         this.filterList(this.state.currentCategory, this.state.currentOrder, e.target.value)
-        /*
-        if (e.target.value == "") {
-            this.setState({
-                items: _.orderBy(this.state.allItems, this.state.currentOrder)
-            });
-        } else {
-            let updatedList = _.filter(this.state.allItems, (item) => {
-                return item.name.toLowerCase().search(
-                    e.target.value.toLowerCase()) !== -1;
-            });
-            this.setState({ items: updatedList });
-        }*/
     }
 
     loadCategories() {
@@ -235,12 +209,14 @@ class Products extends Component {
                                             <h4>{item.name}</h4>
                                             <small>{item.description}</small>
                                             <br />
-                                            <span className="badge badge-pill badge-info">{_.get(this.state.categories, `${item.category}.categoryName`)}</span>
+                                            <span className="badge badge-pill badge-dark">{_.get(this.state.categories, `${item.category}.categoryName`)}</span>
                                         </td>
                                         <td width="150px">
+                                            <h5>
                                             <span className="badge badge-pill badge-primary">
                                                 <NumberFormat value={item.price} displayType={'text'} thousandSeparator={true} prefix={'$'} />
                                             </span>
+                                            </h5>
                                         </td>
                                     </tr>
                                 )
@@ -249,7 +225,7 @@ class Products extends Component {
                 </table>
 
                 <Rodal visible={this.state.visible} animation="door" width="800" height="550" onClose={this.hide.bind(this)}>
-                    <div><ProductDetail item={this.state.currentItem}/></div>
+                    <div><ProductDetail item={this.state.currentItem} categoriesArray={this.state.categoriesArray}/></div>
                 </Rodal>
 
             </div>
