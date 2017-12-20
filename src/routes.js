@@ -1,10 +1,11 @@
 const routes = {
   '/': 'Home',
   '/dashboard': 'Dashboard',
-  '/orders': 'Orders',
-  '/customers': 'Customers',
-  '/categories': 'Categories',
-  '/products': 'Products'
+  '/orders': 'Ordenes',
+  '/customers': 'Clientes',
+  '/categories': 'Categorias',
+  '/products': 'Productos',
+  '/productdetail': 'Detalle del Producto'
 };
 
 export default routes;

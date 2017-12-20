@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import firebase from '../../firebase';
 import NumberFormat from 'react-number-format';
+import { Link } from 'react-router-dom';
 import _ from 'lodash';
+import Rodal from 'rodal';
+import ProductDetail from '../../views/ProductDetail';
+
+import 'rodal/lib/rodal.css';
 
 class Products extends Component {
 
     constructor() {
         super();
         this.state = {
-            currentItem: '',
+            currentItem: null,
             items: [],
             allItems: [],
             categories: null,
@@ -17,11 +22,13 @@ class Products extends Component {
             currentOrder: 'price',
             currentCategory: '',
             currentSearch: '',
+            visible: false
         }
 
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeCategory = this.handleChangeCategory.bind(this);
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
+        this.show = this.show.bind(this);
     }
 
     componentDidMount() {
@@ -149,13 +156,26 @@ class Products extends Component {
 
     }
 
-    onDropdownSelected(e) {
-        console.log("THE VAL", e.target.value);
-        //here you will see the current selected value of the select input
+    getItembyId(id){
+        let items = this.state.allItems;
+        let selItem = _.filter(items, (item) => {
+            return item.id == id
+        });
+        return selItem;
+    }
+
+    show(e) {
+        let item = this.getItembyId(e.target.id);
+        this.setState({currentItem: item, visible: true});
+    }
+
+    hide() {
+        this.setState({ visible: false });
     }
 
     render() {
         return (
+  
             <div className="animated fadeIn">
                 <table className="table table-sm table-inverse mb-2">
                     <thead>
@@ -207,7 +227,9 @@ class Products extends Component {
                                 return (
                                     <tr key={item.id}>
                                         <td width="100px">
-                                            <img src={item.thumbnail} className="rounded float-left" alt={item.name} />
+
+                                            <img id={item.id} src={item.thumbnail} className="rounded float-left" alt={item.name} onClick={this.show} />
+
                                         </td>
                                         <td>
                                             <h4>{item.name}</h4>
@@ -226,6 +248,9 @@ class Products extends Component {
                     </tbody>
                 </table>
 
+                <Rodal visible={this.state.visible} animation="door" width="800" height="550" onClose={this.hide.bind(this)}>
+                    <div><ProductDetail item={this.state.currentItem}/></div>
+                </Rodal>
 
             </div>
 
