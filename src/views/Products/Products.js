@@ -90,6 +90,7 @@ class Products extends Component {
     );
   }
 
+
   loadCategories() {
     const itemsRef = firebase.database().ref("/");
     itemsRef.child("categories").on("value", snapshot => {

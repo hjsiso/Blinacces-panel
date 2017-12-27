@@ -2,7 +2,11 @@ import React, { Component } from "react";
 import firebase from "../../firebase";
 import FileUploader from "react-firebase-file-uploader";
 import { Circle, Line } from "rc-progress";
-//import ImageUpload from "../../components/ImgeUpload"
+import ImageGallery from 'react-image-gallery';
+
+import "react-image-gallery/styles/css/image-gallery.css";
+
+
 
 class ProductDetail extends Component {
   constructor(props) {
@@ -15,10 +19,11 @@ class ProductDetail extends Component {
       imgProduct: "",
       isUploading: false,
       progress: 0,
-      imgProductURL: "",
-      item: this.props.item,
-      images:[]
+      imgProductURL: ""
     };
+
+    this.imagenes = [];
+    this.nextImageID = 0;
 
     this.handleChangeUsername = this.handleChangeUsername.bind(this);
     this.handleUploadStart = this.handleUploadStart.bind(this);
@@ -26,6 +31,48 @@ class ProductDetail extends Component {
     this.handleUploadError = this.handleUploadError.bind(this);
     this.handleUploadSuccess = this.handleUploadSuccess.bind(this);
     this.handleClose = this.handleClose.bind(this);
+  }
+
+  
+
+  componentDidUpdate(){
+   
+   /* const imagenes = [
+      {
+        original: "https://firebasestorage.googleapis.com/v0/b/blindaccesapp.appspot.com/o/images%2Fb576391f-a240-484b-9cb0-9db5bac5e896.png?alt=media&token=52df8c57-4e44-4dc6-8020-d838d54f565b",
+        thumbnail: "https://firebasestorage.googleapis.com/v0/b/blindaccesapp.appspot.com/o/images%2Fb576391f-a240-484b-9cb0-9db5bac5e896.png?alt=media&token=52df8c57-4e44-4dc6-8020-d838d54f565b"
+      }
+    ]
+
+    return imagenes;*/
+    this.imagenes = [];
+    this.nextImageID = 0;
+
+    if (this.props.item) {
+      let refImages = "products/" + this.props.item[0].id + "/images";
+      console.log(
+        "referencia: " + refImages
+      );
+      console.log(refImages);
+      const itemsRef = firebase.database().ref(refImages);
+      itemsRef.on("value", snapshot => {
+        let items = snapshot.val();
+        console.log("items images > ");
+        
+        //let newState = [];
+        for (let item in items) {
+          this.imagenes.push({
+            original: items[item].original,
+            thumbnail: items[item].thumbnail
+          });
+        }
+
+        this.nextImageID = this.imagenes.length + 1;
+        console.log(this.imagenes);
+        console.log(this.nextImageID);
+      });
+    } 
+
   }
 
   handleChangeUsername(event) {
@@ -50,21 +97,23 @@ class ProductDetail extends Component {
       .child(filename)
       .getDownloadURL()
       .then(url => this.putImageItem(url));
-    
-  
   }
 
   putImageItem(url) {
-    this.setState({ imgProductURL: url })
-    console.log("referencia: "+ "products/" + this.props.item[0].id + "/images")
+    //this.setState({ imgProductURL: url });
+    console.log(
+      "referencia: " + "products/" + this.props.item[0].id + "/images"
+    );
+    /*
     const itemsRef = firebase
       .database()
       .ref("products/" + this.props.item[0].id + "/images")
       .push({
-        url: url
-      });
- 
+        url: url,
+        isThumbnail: false
+      });*/
   }
+
   handleClose(e) {
     //console.dir(this.props);
     this.props.onClose();
@@ -73,7 +122,7 @@ class ProductDetail extends Component {
   render() {
     const item = this.props.item;
     const categoriesArray = this.props.categoriesArray;
-    
+  
     return (
       <div className="animated fadeIn">
         <form>
@@ -147,52 +196,10 @@ class ProductDetail extends Component {
                 </div>
                 <div className="col col-sm-6">
                   <div className="row ml-2 mt-1 mr-2">
-                    <div className="col col-sm-4">
-                      <img
-                        src={item[0].thumbnail}
-                        className="rounded float-left"
-                        alt={item[0].name}
-                      />
-                    </div>
-                    <div className="col col-sm-4">
-                      <img
-                        src={item[0].thumbnail}
-                        className="rounded float-left"
-                        alt={item[0].name}
-                      />
-                    </div>
-                    <div className="col col-sm-4">
-                      <img
-                        src={item[0].thumbnail}
-                        className="rounded float-left"
-                        alt={item[0].name}
-                      />
-                    </div>
+                    <ImageGallery items={this.imagenes} />
                   </div>
                   <div className="row ml-2 mt-1 mr-2">
-                    {/*<div className="col col-sm-8">
-                      <label class="custom-file">
-                        <input
-                          type="file"
-                          id="file2"
-                          class="custom-file-input"
-                        />
-                        <span class="custom-file-control" />
-                      </label>
-                    </div>
-                    <div className="col col-sm-4">
-                      <button type="button" class="btn btn-primary">
-                        <i class="fa fa-cloud-upload" aria-hidden="true" />
-                      </button>
-                      </div> 
-                      <div className="col col-sm-12">
-                        <ImageUpload/>
-                      </div>
-                      */}
                     <div className="col col-sm-12">
-                      {/*this.state.imgProductURL && (
-                        <img src={this.state.imgProductURL} />
-                      )*/}
                       <label class="badge badge-primary mb-3">
                         <h6>
                           {" "}
@@ -203,7 +210,7 @@ class ProductDetail extends Component {
                           hidden
                           accept="image/*"
                           name="imgProduct"
-                          randomizeFilename
+                          filename={item[0].id + "~" + this.nextImageID}
                           storageRef={firebase.storage().ref("images")}
                           onUploadStart={this.handleUploadStart}
                           onUploadError={this.handleUploadError}
@@ -213,7 +220,7 @@ class ProductDetail extends Component {
                       </label>
                       {this.state.isUploading && (
                         <div>
-                          Cargando {this.state.progress} % <br/>
+                          Cargando {this.state.progress} % <br />
                           <Line percent={this.state.progress} />
                         </div>
                       )}
