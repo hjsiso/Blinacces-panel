@@ -2,11 +2,9 @@ import React, { Component } from "react";
 import firebase from "../../firebase";
 import FileUploader from "react-firebase-file-uploader";
 import { Circle, Line } from "rc-progress";
-import ImageGallery from 'react-image-gallery';
+import ImageGallery from "react-image-gallery";
 
 import "react-image-gallery/styles/css/image-gallery.css";
-
-
 
 class ProductDetail extends Component {
   constructor(props) {
@@ -15,17 +13,17 @@ class ProductDetail extends Component {
     console.dir(props);
 
     this.state = {
-      username: "",
+      item: props.item,
       imgProduct: "",
       isUploading: false,
       progress: 0,
-      imgProductURL: ""
+      imgProductURL: "",
+      images: []
     };
 
     this.imagenes = [];
     this.nextImageID = 0;
 
-    this.handleChangeUsername = this.handleChangeUsername.bind(this);
     this.handleUploadStart = this.handleUploadStart.bind(this);
     this.handleProgress = this.handleProgress.bind(this);
     this.handleUploadError = this.handleUploadError.bind(this);
@@ -33,50 +31,44 @@ class ProductDetail extends Component {
     this.handleClose = this.handleClose.bind(this);
   }
 
-  
-
-  componentDidUpdate(){
-   
-   /* const imagenes = [
+  componentDidMount() {
+    /* const imagenes = [
       {
         original: "https://firebasestorage.googleapis.com/v0/b/blindaccesapp.appspot.com/o/images%2Fb576391f-a240-484b-9cb0-9db5bac5e896.png?alt=media&token=52df8c57-4e44-4dc6-8020-d838d54f565b",
         thumbnail: "https://firebasestorage.googleapis.com/v0/b/blindaccesapp.appspot.com/o/images%2Fb576391f-a240-484b-9cb0-9db5bac5e896.png?alt=media&token=52df8c57-4e44-4dc6-8020-d838d54f565b"
       }
-    ]
-
-    return imagenes;*/
-    this.imagenes = [];
-    this.nextImageID = 0;
-
-    if (this.props.item) {
-      let refImages = "products/" + this.props.item[0].id + "/images";
-      console.log(
-        "referencia: " + refImages
-      );
-      console.log(refImages);
-      const itemsRef = firebase.database().ref(refImages);
-      itemsRef.on("value", snapshot => {
-        let items = snapshot.val();
-        console.log("items images > ");
-        
-        //let newState = [];
-        for (let item in items) {
-          this.imagenes.push({
-            original: items[item].original,
-            thumbnail: items[item].thumbnail
-          });
-        }
-
-        this.nextImageID = this.imagenes.length + 1;
-        console.log(this.imagenes);
-        console.log(this.nextImageID);
-      });
-    } 
-
+    ]*/
+   
   }
 
-  handleChangeUsername(event) {
-    this.setState({ username: event.target.value });
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.item !== this.state.item) {
+      this.imagenes = [];
+      this.nextImageID = 0;
+
+      if (nextProps.item) {
+        let refImages = "products/" + nextProps.item[0].id + "/images";
+        console.log("referencia: " + refImages);
+        console.log(refImages);
+        const itemsRef = firebase.database().ref(refImages);
+        itemsRef.on("value", snapshot => {
+          let items = snapshot.val();
+          console.log("items images > ");
+
+          let newState = [];
+          for (let item in items) {
+            newState.push({
+              original: items[item].original,
+              thumbnail: items[item].thumbnail
+            });
+          }
+
+          this.nextImageID = newState.length + 1;
+
+          this.setState({ item: nextProps.item, images: newState });
+        });
+      }
+    }
   }
 
   handleUploadStart() {
@@ -122,7 +114,7 @@ class ProductDetail extends Component {
   render() {
     const item = this.props.item;
     const categoriesArray = this.props.categoriesArray;
-  
+
     return (
       <div className="animated fadeIn">
         <form>
@@ -130,44 +122,44 @@ class ProductDetail extends Component {
             <div>
               <div className="row ml-2 mt-1 mr-2">
                 <div className="col col-sm-12">
-                  <div class="alert alert-primary" role="alert">
+                  <div className="alert alert-primary" role="alert">
                     Detalles del Producto
                   </div>
                 </div>
               </div>
               <div className="row ml-2 mt-1 mr-2">
                 <div className="col col-sm-6">
-                  <div class="form-group row">
-                    <label for="name" class="col-sm-4 col-form-label">
+                  <div className="form-group row">
+                    <label for="name" className="col-sm-4 col-form-label">
                       Nombre
                     </label>
-                    <div class="col-sm-8">
+                    <div className="col-sm-8">
                       <input
                         type="text"
-                        class="form-control"
+                        className="form-control"
                         id="name"
                         placeholder={item[0].name}
                       />
                     </div>
                   </div>
-                  <div class="form-group row">
-                    <label for="price" class="col-sm-4 col-form-label">
+                  <div className="form-group row">
+                    <label for="price" className="col-sm-4 col-form-label">
                       Precio
                     </label>
-                    <div class="col-sm-8">
+                    <div className="col-sm-8">
                       <input
                         type="number"
-                        class="form-control"
+                        className="form-control"
                         id="price"
                         placeholder={item[0].price}
                       />
                     </div>
                   </div>
-                  <div class="form-group row">
-                    <label for="category" class="col-sm-4 col-form-label">
+                  <div className="form-group row">
+                    <label for="category" className="col-sm-4 col-form-label">
                       Categoría
                     </label>
-                    <div class="col-sm-8">
+                    <div className="col-sm-8">
                       <select
                         className="custom-select mb-2 mr-sm-2 mb-sm-0"
                         onChange={this.handleChangeCategory}
@@ -187,24 +179,34 @@ class ProductDetail extends Component {
                       </select>
                     </div>
                   </div>
-                  <div class="form-group">
+                  <div className="form-group">
                     <label for="description">Descripción</label>
-                    <textarea class="form-control" id="description" rows="3">
-                      {item[0].description}
-                    </textarea>
+                    <textarea
+                      className="form-control"
+                      id="description"
+                      rows="3"
+                      value={item[0].description}
+                    />
                   </div>
                 </div>
                 <div className="col col-sm-6">
                   <div className="row ml-2 mt-1 mr-2">
-                    <ImageGallery items={this.imagenes} />
+                   {this.state.images.length > 0 ? (
+                    <ImageGallery items={this.state.images} />
+                   ) : (
+                    <div>No hay imagenes cargadas</div>
+                   )}
                   </div>
                   <div className="row ml-2 mt-1 mr-2">
                     <div className="col col-sm-12">
-                      <label class="badge badge-primary mb-3">
+                      <label className="badge badge-primary mb-3">
                         <h6>
                           {" "}
                           Nueva Imagen{" "}
-                          <i class="fa fa-cloud-upload" aria-hidden="true" />
+                          <i
+                            className="fa fa-cloud-upload"
+                            aria-hidden="true"
+                          />
                         </h6>
                         <FileUploader
                           hidden
@@ -232,14 +234,14 @@ class ProductDetail extends Component {
                   <div className="col col-sm-12">
                     <button
                       type="button"
-                      class="btn btn-primary mr-2"
+                      className="btn btn-primary mr-2"
                       onClick={this.handleClose}
                     >
                       Guardar
                     </button>
                     <button
                       type="button"
-                      class="btn btn-primary"
+                      className="btn btn-primary"
                       onClick={this.handleClose}
                     >
                       Cancelar

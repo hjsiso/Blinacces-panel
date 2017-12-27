@@ -31,10 +31,16 @@ const os = require('os');
 const fs = require('fs');
 
 // Max height and width of the thumbnail in pixels.
-const THUMB_MAX_HEIGHT = 200;
-const THUMB_MAX_WIDTH = 200;
+const THUMB_MAX_HEIGHT = 120;
+const THUMB_MAX_WIDTH = 120;
 // Thumbnail prefix added to file names.
 const THUMB_PREFIX = 'thumb_';
+
+// Max height and width of the thumbnail in pixels.
+const ORIG_MAX_HEIGHT = 350;
+const ORIG_MAX_WIDTH = 350;
+// Thumbnail prefix added to file names.
+const ORIG_PREFIX = 'orig_';
 
 /**
  * When an image is uploaded in the Storage bucket We generate a thumbnail automatically using
@@ -48,11 +54,16 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
   const contentType = event.data.contentType; // This is the image Mimme type
   const fileDir = path.dirname(filePath);
   const fileName = path.basename(filePath);
+
   const thumbFilePath = path.normalize(path.join(fileDir, `${THUMB_PREFIX}${fileName}`));
+  const origFilePath = path.normalize(path.join(fileDir, `${ORIG_PREFIX}${fileName}`));
+
   const tempLocalFile = path.join(os.tmpdir(), filePath);
   const tempLocalDir = path.dirname(tempLocalFile);
+
   const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
-  
+  const tempLocalOrigFile = path.join(os.tmpdir(), origFilePath);
+
   const idItemDb = fileName.slice(0, fileName.indexOf("~"));
 
   // Exit if this is triggered on a file that is not an image.
@@ -62,8 +73,8 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
   }
 
   // Exit if the image is already a thumbnail.
-  if (fileName.startsWith(THUMB_PREFIX)) {
-    console.log('Already a Thumbnail.');
+  if (fileName.startsWith(ORIG_PREFIX) || fileName.startsWith(THUMB_PREFIX)) {
+    console.log('Already a converted.');
     return null;
   }
 
@@ -76,7 +87,10 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
   // Cloud Storage files.
   const bucket = gcs.bucket(event.data.bucket);
   const file = bucket.file(filePath);
+
   const thumbFile = bucket.file(thumbFilePath);
+  const origFile = bucket.file(origFilePath);
+
   const metadata = { contentType: contentType };
 
   // Create the temp directory where the storage file will be downloaded.
@@ -86,15 +100,24 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
   }).then(() => {
     console.log('The file has been downloaded to', tempLocalFile);
     // Generate a thumbnail using ImageMagick.
-    return spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});
+    return spawn('convert', [tempLocalFile, '-resize', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}`, '-gravity center', tempLocalThumbFile], {capture: ['stdout', 'stderr']});
   }).then(() => {
     console.log('Thumbnail created at', tempLocalThumbFile);
     // Uploading the Thumbnail.
     return bucket.upload(tempLocalThumbFile, { destination: thumbFilePath, metadata: metadata });
   }).then(() => {
-    console.log('Thumbnail uploaded to Storage at', thumbFilePath);
+    console.log('The file has been downloaded to', tempLocalFile);
+    // Generate a Original Resize using ImageMagick.
+    return spawn('convert', [tempLocalFile, '-resize', `${ORIG_MAX_WIDTH}x${ORIG_MAX_HEIGHT}`, '-gravity center', tempLocalOrigFile], {capture: ['stdout', 'stderr']});
+  }).then(() => {
+    console.log('Original Resized created at', tempLocalOrigFile);
+    // Uploading the Original Resize.
+    return bucket.upload(tempLocalOrigFile, { destination: origFilePath, metadata: metadata });
+  }).then(() => {
+    console.log('Original Resize uploaded to Storage at', origFilePath);
     // Once the image has been uploaded delete the local files to free up disk space.
     fs.unlinkSync(tempLocalFile);
+    fs.unlinkSync(tempLocalOrigFile);
     fs.unlinkSync(tempLocalThumbFile);
     // Get the Signed URLs for the thumbnail and original image.
     const config = {
@@ -103,7 +126,8 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
     };
     return Promise.all([
       thumbFile.getSignedUrl(config),
-      file.getSignedUrl(config)
+      origFile.getSignedUrl(config)
+      //file.getSignedUrl(config)
     ]);
   }).then(results => {
     console.log('Got Signed URLs.');
@@ -116,3 +140,4 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
     return admin.database().ref(refImages).push({original: fileUrl, thumbnail: thumbFileUrl});
   }).then(() => console.log('Thumbnail URLs saved to database.'));
 });
+

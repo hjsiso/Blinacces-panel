@@ -39,7 +39,7 @@ class Products extends Component {
         newState.push({
           id: item,
           name: items[item].name,
-          thumbnail: items[item].thumbnail + "/" + items[item].name,
+          thumbnail: items[item].thumbnail,
           description: items[item].description,
           price: items[item].price,
           category: items[item].category
@@ -212,6 +212,7 @@ class Products extends Component {
               return (
                 <tr key={item.id}>
                   <td width="100px">
+                  {item.thumbnail ? (
                     <img
                       id={item.id}
                       src={item.thumbnail}
@@ -219,6 +220,15 @@ class Products extends Component {
                       alt={item.name}
                       onClick={this.show}
                     />
+                  ) : (
+                    <img
+                      id={item.id}
+                      src="img/logo-symbol.png"
+                      className="rounded float-left"
+                      alt={item.name}
+                      onClick={this.show}
+                    />
+                  )}
                     {/*                    <button
                       id={item.id}
                       type="button"
