@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import store from '../../store';
+
 import firebase from "../../firebase";
 import NumberFormat from "react-number-format";
 import { Link } from "react-router-dom";
@@ -39,7 +41,7 @@ class Products extends Component {
         newState.push({
           id: item,
           name: items[item].name,
-          thumbnail: items[item].thumbnail,
+          thumbnail: items[item].thumbnail ? items[item].thumbnail[0].thumbnail : 'img/logo-symbol.png',
           description: items[item].description,
           price: items[item].price,
           category: items[item].category

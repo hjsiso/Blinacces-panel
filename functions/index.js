@@ -100,7 +100,7 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
   }).then(() => {
     console.log('The file has been downloaded to', tempLocalFile);
     // Generate a thumbnail using ImageMagick.
-    return spawn('convert', [tempLocalFile, '-resize', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}`, '-gravity center', tempLocalThumbFile], {capture: ['stdout', 'stderr']});
+    return spawn('convert', [tempLocalFile, '-resize', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}^`, '-gravity', 'center', '-extent', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});
   }).then(() => {
     console.log('Thumbnail created at', tempLocalThumbFile);
     // Uploading the Thumbnail.
@@ -108,7 +108,7 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
   }).then(() => {
     console.log('The file has been downloaded to', tempLocalFile);
     // Generate a Original Resize using ImageMagick.
-    return spawn('convert', [tempLocalFile, '-resize', `${ORIG_MAX_WIDTH}x${ORIG_MAX_HEIGHT}`, '-gravity center', tempLocalOrigFile], {capture: ['stdout', 'stderr']});
+    return spawn('convert', [tempLocalFile, '-resize', `${ORIG_MAX_WIDTH}x${ORIG_MAX_HEIGHT}^`, '-gravity', 'center', '-extent', `${ORIG_MAX_WIDTH}x${ORIG_MAX_HEIGHT}`, tempLocalOrigFile], {capture: ['stdout', 'stderr']});
   }).then(() => {
     console.log('Original Resized created at', tempLocalOrigFile);
     // Uploading the Original Resize.
