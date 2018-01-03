@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { Route } from "react-router-dom";
+import store from "../../store";
 import firebase from "../../firebase";
 import FileUploader from "react-firebase-file-uploader";
 import _ from "lodash";
@@ -13,19 +15,21 @@ class ProductDetail extends Component {
     console.dir(props);
 
     this.state = {
-      item: props.item,
+      items: store.getState().products,
+      item: this.getItembyId(props.match.params.id, store.getState().products),
       imgProduct: "",
       isUploading: false,
       isProcessing: false,
       progress: 0,
       imgProductURL: "",
       imgThumbnail: null,
-      images: []
+      images: [],
+      nextImageID: 0
     };
 
     this.imagenes = [];
     this.nextImageID = 0;
-
+    Route;
     this.handleUploadStart = this.handleUploadStart.bind(this);
     this.handleProgress = this.handleProgress.bind(this);
     this.handleUploadError = this.handleUploadError.bind(this);
@@ -33,6 +37,33 @@ class ProductDetail extends Component {
     this.handleClose = this.handleClose.bind(this);
   }
 
+  componentDidMount() {
+    let refImages = "products/" + this.state.item[0].id + "/images";
+    console.log("referencia: " + refImages);
+    console.log(refImages);
+    const itemsRef = firebase.database().ref(refImages);
+    itemsRef.on("value", snapshot => {
+      let items = snapshot.val();
+      console.log("items images > ");
+
+      let newState = [];
+
+      for (let item in items) {
+        newState.push({
+          id: item,
+          original: items[item].original,
+          thumbnail: items[item].thumbnail
+        });
+      }
+
+      this.setState({
+        images: newState,
+        isProcessing: false,
+        nextImageID: newState.length + 1
+      });
+    });
+  }
+  /*
   componentWillReceiveProps(nextProps) {
     if (nextProps.item !== this.state.item) {
       this.imagenes = [];
@@ -68,7 +99,7 @@ class ProductDetail extends Component {
         });
       }
     }
-  }
+  }*/
 
   handleUploadStart() {
     this.setState({ isUploading: true, progress: 0 });
@@ -105,12 +136,11 @@ class ProductDetail extends Component {
   showImage(e) {
     //e.preventDefault();
     let imgThumbnail = this.getItembyId(e.target.id, this.state.images);
-     
-    this.setState({imgThumbnail: imgThumbnail });
+
+    this.setState({ imgThumbnail: imgThumbnail });
   }
 
   setImage(e) {
- 
     firebase
       .database()
       .ref("products/" + this.state.item[0].id)
@@ -136,28 +166,21 @@ class ProductDetail extends Component {
   }
 
   render() {
-    const item = this.props.item;
-    const categoriesArray = this.props.categoriesArray;
+    const item = this.state.item;
+    const categories = store.getState().categories;
 
     return (
       <div className="animated fadeIn">
         <form>
           {item ? (
             <div>
-              {/*<div className="row ml-2 mt-1 mr-2">
+              <div className="row ml-2 mt-1 mr-2">
                 <div className="col col-sm-12">
                   <div className="alert alert-primary" role="alert">
-                  <div class=""> 
-                                      
-                    <img style={{height: '42px', width: '42px'}} src={this.state.thumbnail} alt="..." className="rounded" />
-                    </div>
-                    {" "}
-                    <div class="">
                     <small>Detalles del Producto</small>
-                    </div>
                   </div>
                 </div>
-          </div>*/}
+              </div>
               <div className="row ml-2 mt-1 mr-2">
                 <div className="col col-sm-6">
                   <div className="form-group row">
@@ -196,7 +219,7 @@ class ProductDetail extends Component {
                         onChange={this.handleChangeCategory}
                       >
                         <option value="">Seleccione</option>
-                        {categoriesArray.map(category => {
+                        {categories.map(category => {
                           return (
                             <option
                               selected={category.id == item[0].category}
@@ -215,7 +238,7 @@ class ProductDetail extends Component {
                     <textarea
                       className="form-control"
                       id="description"
-                      rows="2"
+                      rows="4"
                       value={item[0].description}
                     />
                   </div>
@@ -229,13 +252,27 @@ class ProductDetail extends Component {
                     </button>
                   </div>
                   <div className="d-flex flex-row">
-                    <button
+                    <Route
+                      render={({ history }) => (
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm btn-block"
+                          onClick={() => {
+                            history.push("/products");
+                          }}
+                        >
+                          Cancelar
+                        </button>
+                      )}
+                    />
+
+                    {/*                    <button
                       type="button"
                       className="btn btn-danger btn-sm btn-block"
                       onClick={this.handleClose}
                     >
                       Cancelar
-                    </button>
+</button>*/}
                   </div>
                 </div>
                 <div className="col col-sm-6">
@@ -254,7 +291,9 @@ class ProductDetail extends Component {
                             <button
                               type="button"
                               class="btn btn-outline-secondary btn-sm btn-block"
-                              data-toggle="tooltip" data-placement="top" title="Imagen Principal"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Imagen Principal"
                               onClick={e => this.setImage(e)}
                             >
                               <i class="fa fa-picture-o" aria-hidden="true" />
@@ -264,7 +303,9 @@ class ProductDetail extends Component {
                             <button
                               type="button"
                               class="btn btn-outline-danger btn-sm btn-block"
-                              data-toggle="tooltip" data-placement="top" title="Eliminar Imagen"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Eliminar Imagen"
                             >
                               <i class="fa fa-trash" aria-hidden="true" />
                             </button>

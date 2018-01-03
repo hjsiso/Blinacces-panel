@@ -10,7 +10,7 @@ import ProductDetail from "../../views/ProductDetail";
 
 import "rodal/lib/rodal.css";
 
-class Products extends Component {
+class ProductsList extends Component {
   constructor() {
     super();
     this.state = {
@@ -54,7 +54,15 @@ class Products extends Component {
         items: newState,
         allItems: newState
       });
+
+      store.dispatch({
+        type: "SET_PRODUCT_LIST",
+        products: newState
+      })
+
     });
+
+
 
     this.loadCategories();
   }
@@ -109,6 +117,11 @@ class Products extends Component {
         categories: snapshot.val(),
         categoriesArray: newState
       });
+
+      store.dispatch({
+        type: "SET_CATEGORY_LIST",
+        categories: newState
+      })
     });
   }
 
@@ -127,7 +140,7 @@ class Products extends Component {
       this.setState({
         items: _.orderBy(items, order)
       });
-    }
+    }    
     if (searchString != "") {
       items = _.filter(items, item => {
         return (
@@ -136,6 +149,11 @@ class Products extends Component {
       });
       this.setState({ items: items });
     }
+
+    store.dispatch({
+      type: "SET_PRODUCT_LIST",
+      products: items
+    })
   }
 
   getItembyId(id) {
@@ -215,21 +233,25 @@ class Products extends Component {
                 <tr key={item.id}>
                   <td width="100px">
                   {item.thumbnail ? (
+                    <Link to={`/products/${item.id}`}>
                     <img
                       id={item.id}
                       src={item.thumbnail}
                       className="rounded float-left"
                       alt={item.name}
-                      onClick={this.show}
+                       
                     />
+                    </Link>
                   ) : (
+                    <Link to={`/products/${item.id}`}>
                     <img
                       id={item.id}
                       src="img/logo-symbol.png"
                       className="rounded float-left"
                       alt={item.name}
-                      onClick={this.show}
+                    
                     />
+                    </Link>
                   )}
                     {/*                    <button
                       id={item.id}
@@ -268,7 +290,7 @@ class Products extends Component {
             })}
           </tbody>
         </table>
-
+          { /* 
         <Rodal
           visible={this.state.visible}
           showCloseButton={false}
@@ -284,10 +306,13 @@ class Products extends Component {
               onClose={this.hide.bind(this)}
             />
           </div>
-        </Rodal>
+          </Rodal>
+          */}
+
+        
       </div>
     );
   }
 }
 
-export default Products;
+export default ProductsList;

@@ -5,7 +5,7 @@ const routes = {
   '/customers': 'Clientes',
   '/categories': 'Categorias',
   '/products': 'Productos',
-  '/productdetail': 'Detalle del Producto'
+  '/products/details': 'Detalle del Producto'
 };
 
 export default routes;
