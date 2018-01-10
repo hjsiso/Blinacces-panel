@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import _ from "lodash";
 import Rodal from "rodal";
 import ProductDetail from "../../views/ProductDetail";
-
+import Authorization from '../../Authorization'
 import "rodal/lib/rodal.css";
 
 class ProductsList extends Component {
@@ -20,17 +20,19 @@ class ProductsList extends Component {
       categories: null,
       categoriesArray: [],
       showEditOpts: false,
-      currentOrder: "price",
-      currentCategory: "",
-      currentSearch: "",
+      currentOrder: store.getState().filterProducts.order,
+      currentCategory: store.getState().filterProducts.category,
+      currentSearch: store.getState().filterProducts.searchString,
       visible: false
     };
 
-    this.handleChange = this.handleChange.bind(this);
+    this.handleChangeOrder = this.handleChangeOrder.bind(this);
     this.handleChangeCategory = this.handleChangeCategory.bind(this);
     this.handleChangeSearch = this.handleChangeSearch.bind(this);
     this.show = this.show.bind(this);
   }
+
+
 
   componentDidMount() {
     const itemsRef = firebase.database().ref("/");
@@ -41,10 +43,11 @@ class ProductsList extends Component {
         newState.push({
           id: item,
           name: items[item].name,
-          thumbnail: items[item].thumbnail ? items[item].thumbnail[0].thumbnail : 'img/logo-symbol.png',
+          images: items[item].images,
           description: items[item].description,
           price: items[item].price,
-          category: items[item].category
+          category: items[item].category,
+          outstanding: items[item].outstanding
         });
       }
 
@@ -53,51 +56,34 @@ class ProductsList extends Component {
       this.setState({
         items: newState,
         allItems: newState
-      });
+      }, () => { this.filterList() });
 
       store.dispatch({
         type: "SET_PRODUCT_LIST",
         products: newState
-      })
+      });
 
     });
-
-
-
     this.loadCategories();
+
   }
 
-  handleChange(e) {
+  handleChangeOrder(e) {
     this.setState({
       currentOrder: e.target.value
-    });
-    this.filterList(
-      this.state.currentCategory,
-      e.target.value,
-      this.state.currentSearch
-    );
+    }, () => { this.filterList() });
   }
 
   handleChangeCategory(e) {
     this.setState({
       currentCategory: e.target.value
-    });
-    this.filterList(
-      e.target.value,
-      this.state.currentOrder,
-      this.state.currentSearch
-    );
+    }, () => { this.filterList() });
   }
 
   handleChangeSearch(e) {
     this.setState({
       currentSearch: e.target.value
-    });
-    this.filterList(
-      this.state.currentCategory,
-      this.state.currentOrder,
-      e.target.value
-    );
+    }, () => { this.filterList() });
   }
 
 
@@ -125,30 +111,39 @@ class ProductsList extends Component {
     });
   }
 
-  filterList(category, order, searchString) {
+  filterList() {
     let items = this.state.allItems;
-    if (category != "") {
+    if (this.state.currentCategory !== "") {
       items = _.filter(items, item => {
-        return item.category == category;
+        return item.category == this.state.currentCategory;
       });
 
       this.setState({
         items: items
       });
     }
-    if (order != "") {
+    if (this.state.currentOrder !== "") {
       this.setState({
-        items: _.orderBy(items, order)
+        items: _.orderBy(items, this.state.currentOrder)
       });
-    }    
-    if (searchString != "") {
+    }
+    if (this.state.currentSearch !== "") {
       items = _.filter(items, item => {
         return (
-          item.name.toLowerCase().search(searchString.toLowerCase()) !== -1
+          item.name.toLowerCase().search(this.state.currentSearch.toLowerCase()) !== -1
         );
       });
       this.setState({ items: items });
     }
+
+    store.dispatch({
+      type: "SET_PRODUCT_FILTER",
+      filterProducts: {
+        order: this.state.currentOrder,
+        category: this.state.currentCategory,
+        searchString: this.state.currentSearch
+      }
+    });
 
     store.dispatch({
       type: "SET_PRODUCT_LIST",
@@ -176,7 +171,7 @@ class ProductsList extends Component {
   render() {
     return (
       <div className="animated fadeIn">
-        <table className="table table-sm table-inverse mb-2">
+        <table className="table table-sm table-inverse table-striped">
           <thead>
             <tr>
               <th colSpan="3">
@@ -197,7 +192,7 @@ class ProductsList extends Component {
                         <option value="">Todas</option>
                         {this.state.categoriesArray.map(item => {
                           return (
-                            <option key={item.id} value={item.id}>
+                            <option key={item.id} value={item.id} selected={item.id === this.state.currentCategory}>
                               {item.categoryName}
                             </option>
                           );
@@ -208,10 +203,10 @@ class ProductsList extends Component {
                     <div className="col col-sm-2">
                       <select
                         className="form-control form-control-sm"
-                        onChange={this.handleChange}
+                        onChange={this.handleChangeOrder}
                       >
-                        <option value="price">Precio</option>
-                        <option value="name">Nombre</option>
+                        <option value="price" selected={'price' === this.state.currentOrder}>Precio</option>
+                        <option value="name" selected={'name' === this.state.currentOrder}>Nombre</option>
                       </select>
                     </div>
                     <div className="col col-sm-2">
@@ -220,6 +215,7 @@ class ProductsList extends Component {
                         placeholder="Buscar..."
                         className="form-control form-control-sm"
                         onChange={this.handleChangeSearch}
+                        value={this.state.currentSearch}
                       />
                     </div>
                   </div>
@@ -232,87 +228,73 @@ class ProductsList extends Component {
               return (
                 <tr key={item.id}>
                   <td width="100px">
-                  {item.thumbnail ? (
-                    <Link to={`/products/${item.id}`}>
-                    <img
-                      id={item.id}
-                      src={item.thumbnail}
-                      className="rounded float-left"
-                      alt={item.name}
-                       
-                    />
-                    </Link>
-                  ) : (
-                    <Link to={`/products/${item.id}`}>
-                    <img
-                      id={item.id}
-                      src="img/logo-symbol.png"
-                      className="rounded float-left"
-                      alt={item.name}
-                    
-                    />
-                    </Link>
-                  )}
-                    {/*                    <button
-                      id={item.id}
-                      type="button"
-                      class="btn btn-outline-primary btn-sm"
-                      onClick={this.show}
-                    >
-                      Detalle
-</button> */}
+                    <div className="mt-2">
+                      {item.images && item.images[0] ? (
+                        <Link to={`/products/${item.id}`}>
+                          <img
+                            id={item.id}
+                            src={item.images[0].thumbnail}
+                            className="rounded float-left"
+                            alt={item.name}
+
+                          />
+                        </Link>
+                      ) : (
+                          <Link to={`/products/${item.id}`}>
+                            <img
+                              id={item.id}
+                              src="img/logo-symbol.png"
+                              className="rounded float-left"
+                              alt={item.name}
+
+                            />
+                          </Link>
+                        )}
+                    </div>
                   </td>
                   <td>
-                    <h4>{item.name}</h4>
-                    <small>{item.description}</small>
-                    <br />
-                    <span className="badge badge-pill badge-dark">
-                      {_.get(
-                        this.state.categories,
-                        `${item.category}.categoryName`
-                      )}
-                    </span>
+                    <div className="d-flex flex-column">
+                      <div className="p-2">
+                        <h4>{item.name}</h4>
+                      </div>
+                      <div className="p-2">
+                        <small>{item.description}</small>
+                      </div>
+                      <div className="p-2">
+                        <span className="badge badge-pill badge-info p-2">
+                          {_.get(
+                            this.state.categories,
+                            `${item.category}.categoryName`
+                          )}
+                        </span>
+                        {item.outstanding && (
+                         <span class="badge badge-pill badge-warning p-2 ml-2">Destacado</span>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td width="150px">
-                    <h5>
-                      <span className="badge badge-pill badge-primary">
-                        <NumberFormat
-                          value={item.price}
-                          displayType={"text"}
-                          thousandSeparator={true}
-                          prefix={"$"}
-                        />
-                      </span>
-                    </h5>
+                    <div className="mt-3">
+                      <h4>
+                        <span className="badge badge-pill badge-primary p-2">
+                          <NumberFormat
+                            value={item.price}
+                            displayType={"text"}
+                            thousandSeparator={true}
+                            prefix={"$ "}
+                          />
+                        </span>
+                      </h4>
+                    </div>
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-          { /* 
-        <Rodal
-          visible={this.state.visible}
-          showCloseButton={false}
-          animation="door"
-          width={900}
-          height={500}
-          onClose={this.hide.bind(this)}
-        >
-          <div>
-            <ProductDetail
-              item={this.state.currentItem}
-              categoriesArray={this.state.categoriesArray}
-              onClose={this.hide.bind(this)}
-            />
-          </div>
-          </Rodal>
-          */}
-
-        
       </div>
     );
   }
 }
 
-export default ProductsList;
+export default Authorization(ProductsList);

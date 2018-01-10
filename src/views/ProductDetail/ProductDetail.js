@@ -7,109 +7,75 @@ import _ from "lodash";
 import { Line } from "rc-progress";
 //import ImageGallery from "react-image-gallery";
 import { HashLoader } from "react-spinners";
+import { ToastContainer, ToastStore } from 'react-toasts';
+import Authorization from '../../Authorization'
 
 class ProductDetail extends Component {
   constructor(props) {
     super(props);
 
     console.dir(props);
-
+    let product = this.getItembyId(props.match.params.id, store.getState().products)
     this.state = {
       items: store.getState().products,
-      item: this.getItembyId(props.match.params.id, store.getState().products),
+      item: props.match.params.id !== '' ? product : null,
+      name: product !== null ? product[0].name : null,
+      price: product !== null ? product[0].price : null,
+      category: product !== null ? product[0].category : null,
+      description: product !== null ? product[0].description : null,
+      outstanding: product !== null && product[0].outstanding ? product[0].outstanding : null,
       imgProduct: "",
       isUploading: false,
       isProcessing: false,
       progress: 0,
       imgProductURL: "",
-      imgThumbnail: null,
-      images: [],
-      nextImageID: 0
+      imgPreview: "",
+      images: null
     };
 
-    this.imagenes = [];
-    this.nextImageID = 0;
-    Route;
+    //Route;
     this.handleUploadStart = this.handleUploadStart.bind(this);
     this.handleProgress = this.handleProgress.bind(this);
     this.handleUploadError = this.handleUploadError.bind(this);
     this.handleUploadSuccess = this.handleUploadSuccess.bind(this);
-    this.handleClose = this.handleClose.bind(this);
+    this.previewImage = this.previewImage.bind(this);
+    this.deleteImage = this.deleteImage.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+
+    
   }
 
-  componentDidMount() {
-    let refImages = "products/" + this.state.item[0].id + "/images";
-    console.log("referencia: " + refImages);
-    console.log(refImages);
-    const itemsRef = firebase.database().ref(refImages);
-    itemsRef.on("value", snapshot => {
-      let items = snapshot.val();
-      console.log("items images > ");
+  componentWillMount() {
 
-      let newState = [];
-
-      for (let item in items) {
-        newState.push({
-          id: item,
-          original: items[item].original,
-          thumbnail: items[item].thumbnail
+    if (this.state.item.length > 0) {
+      let refImages = "products/" + this.state.item[0].id + "/images";
+      //console.log("referencia: " + refImages);
+      //console.log(refImages);
+      const itemsRef = firebase.database().ref(refImages);
+      itemsRef.on("value", snapshot => {
+        let items = snapshot.val();
+        //console.log("items images > ");
+        this.setState({
+          images: items,
+          isProcessing: false
         });
-      }
-
-      this.setState({
-        images: newState,
-        isProcessing: false,
-        nextImageID: newState.length + 1
       });
-    });
-  }
-  /*
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.item !== this.state.item) {
-      this.imagenes = [];
-      this.nextImageID = 0;
-
-      if (nextProps.item) {
-        let refImages = "products/" + nextProps.item[0].id + "/images";
-        console.log("referencia: " + refImages);
-        console.log(refImages);
-        const itemsRef = firebase.database().ref(refImages);
-        itemsRef.on("value", snapshot => {
-          let items = snapshot.val();
-          console.log("items images > ");
-
-          let newState = [];
-
-          for (let item in items) {
-            newState.push({
-              id: item,
-              original: items[item].original,
-              thumbnail: items[item].thumbnail
-            });
-          }
-
-          this.nextImageID = newState.length + 1;
-
-          this.setState({
-            item: nextProps.item,
-            images: newState,
-            isProcessing: false,
-            thumbnail: nextProps.item[0].thumbnail
-          });
-        });
-      }
     }
-  }*/
+
+  }
+
 
   handleUploadStart() {
     this.setState({ isUploading: true, progress: 0 });
   }
+
   handleProgress(progress) {
     this.setState({ progress });
   }
   handleUploadError(error) {
     this.setState({ isUploading: false });
-    console.error(error);
+    //console.error(error);
   }
 
   handleUploadSuccess(filename) {
@@ -117,44 +83,22 @@ class ProductDetail extends Component {
       imgProduct: filename,
       progress: 100,
       isUploading: false,
-      isProcessing: true
+      isProcessing: true,
+      imgPreview: ""
     });
-    /*
-    firebase
-      .storage()
-      .ref("images")
-      .child(filename)
-      .getDownloadURL()
-      .then(url => this.putImageItem(url));*/
   }
 
-  handleClose(e) {
-    //console.dir(this.props);
-    this.props.onClose();
+
+  previewImage(e) {
+    //console.log(e.target.id);
+    //console.log(this.state.images[e.target.id].original);
+    this.setState({ imgPreview: e.target.id });
   }
 
-  showImage(e) {
-    //e.preventDefault();
-    let imgThumbnail = this.getItembyId(e.target.id, this.state.images);
-
-    this.setState({ imgThumbnail: imgThumbnail });
-  }
-
-  setImage(e) {
-    firebase
-      .database()
-      .ref("products/" + this.state.item[0].id)
-      .update({
-        thumbnail: this.state.imgThumbnail
-      });
-  }
-
-  configHandler(e) {
-    console.log(e);
-  }
-
-  deleteHandler(e) {
-    console.log(e);
+  deleteImage() {
+    this.setState({ imgPreview: false });
+    let refImages = "products/" + this.state.item[0].id + "/images/" + this.state.imgPreview;
+    firebase.database().ref(refImages).remove();
   }
 
   getItembyId(id, colection) {
@@ -165,14 +109,43 @@ class ProductDetail extends Component {
     return selItem;
   }
 
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    let refProduct = "products/" + this.state.item[0].id;
+    firebase.database().ref(refProduct).update({
+      name: this.state.name,
+      price: this.state.price,
+      category: this.state.category,
+      description: this.state.description,
+      outstanding: this.state.outstanding
+    }).then(() => {
+      console.log("updated");
+      ToastStore.success('Los datos fueron guardados !');
+    }).error(() => {
+      console.log("updated");
+      ToastStore.error('Error al guardar los datos !');
+    });
+  }
+
   render() {
     const item = this.state.item;
     const categories = store.getState().categories;
 
     return (
       <div className="animated fadeIn">
+        <ToastContainer store={ToastStore} />
         <form>
-          {item ? (
+          {this.state.item.length > 0 ? (
             <div>
               <div className="row ml-2 mt-1 mr-2">
                 <div className="col col-sm-12">
@@ -182,7 +155,7 @@ class ProductDetail extends Component {
                 </div>
               </div>
               <div className="row ml-2 mt-1 mr-2">
-                <div className="col col-sm-6">
+                <div className="col col-sm-6 mb-2">
                   <div className="form-group row">
                     <label for="name" className="col-sm-4 col-form-label">
                       Nombre
@@ -192,7 +165,9 @@ class ProductDetail extends Component {
                         type="text"
                         className="form-control"
                         id="name"
-                        placeholder={item[0].name}
+                        name="name"
+                        defaultValue={this.state.item[0].name}
+                        onChange={this.handleInputChange}
                       />
                     </div>
                   </div>
@@ -205,7 +180,24 @@ class ProductDetail extends Component {
                         type="number"
                         className="form-control"
                         id="price"
-                        placeholder={item[0].price}
+                        name="price"
+                        defaultValue={this.state.item[0].price}
+                        onChange={this.handleInputChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group row">
+                    <label for="name" className="col-sm-4 col-form-label">
+                      Destacado
+                    </label>
+                    <div className="col-sm-8">
+                      <input
+                        type="checkbox"
+                        className="form-control"
+                        id="outstanding"
+                        name="outstanding"
+                        checked={this.state.outstanding}
+                        onChange={this.handleInputChange}
                       />
                     </div>
                   </div>
@@ -216,13 +208,13 @@ class ProductDetail extends Component {
                     <div className="col-sm-8">
                       <select
                         className="custom-select mb-2 mr-sm-2 mb-sm-0"
-                        onChange={this.handleChangeCategory}
+                        name="category"
+                        onChange={this.handleInputChange}
                       >
-                        <option value="">Seleccione</option>
                         {categories.map(category => {
                           return (
                             <option
-                              selected={category.id == item[0].category}
+                              selected={category.id === this.state.item[0].category}
                               key={category.id}
                               value={category.id}
                             >
@@ -238,15 +230,198 @@ class ProductDetail extends Component {
                     <textarea
                       className="form-control"
                       id="description"
-                      rows="4"
-                      value={item[0].description}
+                      name="description"
+                      onChange={this.handleInputChange}
+                      rows="7"
+                      defaultValue={this.state.item[0].description}
                     />
                   </div>
+
+                </div>
+                <div className="col col-sm-6">
+                  <div className="d-flex flex-row mb-2">
+                    <div className="mr-2">
+
+                      {this.state.images && this.state.images[0] ? (
+                        <img src={this.state.images[0].thumbnail} id="0" style={{ height: '70px', width: '70px', borderRadius: 4, cursor: 'pointer' }} onClick={this.previewImage} />
+                      ) : (
+                          <label style={{ height: '70px', width: '70px', backgroundColor: '#d6d6d6', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer' }}>
+                            1
+                           <i
+                              className="fa fa-cloud-upload"
+                              aria-hidden="true"
+                            />
+                            <FileUploader
+                              hidden
+                              accept="image/*"
+                              name="imgProduct"
+                              filename={item[0].id + "~" + 0}
+                              storageRef={firebase.storage().ref("images")}
+                              onUploadStart={this.handleUploadStart}
+                              onUploadError={this.handleUploadError}
+                              onUploadSuccess={this.handleUploadSuccess}
+                              onProgress={this.handleProgress}
+                            />
+                          </label>
+                        )
+                      }
+
+                    </div>
+                    <div className="mr-2">
+                      {this.state.images && this.state.images[1] ? (
+                        <img src={this.state.images[1].thumbnail} id="1" style={{ height: '70px', width: '70px', borderRadius: 4, cursor: 'pointer' }} onClick={this.previewImage} />
+                      ) : (
+                          <label style={{ height: '70px', width: '70px', backgroundColor: '#d6d6d6', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer' }}>
+                            2                        <i
+                              className="fa fa-cloud-upload"
+                              aria-hidden="true"
+                            />
+                            <FileUploader
+                              hidden
+                              accept="image/*"
+                              name="imgProduct"
+                              filename={item[0].id + "~" + 1}
+                              storageRef={firebase.storage().ref("images")}
+                              onUploadStart={this.handleUploadStart}
+                              onUploadError={this.handleUploadError}
+                              onUploadSuccess={this.handleUploadSuccess}
+                              onProgress={this.handleProgress}
+                            />
+                          </label>
+                        )
+                      }
+                    </div>
+
+                    <div className="mr-2">
+                      {this.state.images && this.state.images[2] ? (
+                        <img src={this.state.images[2].thumbnail} id="2" style={{ height: '70px', width: '70px', borderRadius: 4, cursor: 'pointer' }} onClick={this.previewImage} />
+                      ) : (
+                          <label style={{ height: '70px', width: '70px', backgroundColor: '#d6d6d6', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer' }} >
+                            3                        <i
+                              className="fa fa-cloud-upload"
+                              aria-hidden="true"
+                            />
+                            <FileUploader
+                              hidden
+                              accept="image/*"
+                              name="imgProduct"
+                              filename={item[0].id + "~" + 2}
+                              storageRef={firebase.storage().ref("images")}
+                              onUploadStart={this.handleUploadStart}
+                              onUploadError={this.handleUploadError}
+                              onUploadSuccess={this.handleUploadSuccess}
+                              onProgress={this.handleProgress}
+                            />
+                          </label>
+                        )
+                      }
+                    </div>
+
+                    <div className="mr-2">
+                      {this.state.images && this.state.images[3] ? (
+                        <img src={this.state.images[3].thumbnail} id="3" style={{ height: '70px', width: '70px', borderRadius: 4, cursor: 'pointer' }} onClick={this.previewImage} />
+                      ) : (
+                          <label style={{ height: '70px', width: '70px', backgroundColor: '#d6d6d6', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer' }}>
+                            4                         <i
+                              className="fa fa-cloud-upload"
+                              aria-hidden="true"
+                            />
+                            <FileUploader
+                              hidden
+                              accept="image/*"
+                              name="imgProduct"
+                              filename={item[0].id + "~" + 3}
+                              storageRef={firebase.storage().ref("images")}
+                              onUploadStart={this.handleUploadStart}
+                              onUploadError={this.handleUploadError}
+                              onUploadSuccess={this.handleUploadSuccess}
+                              onProgress={this.handleProgress}
+                            />
+                          </label>
+                        )
+                      }
+                    </div>
+                  </div>
+                  {this.state.imgPreview && !(this.state.isUploading || this.state.isProcessing) ? (
+                    <div className="d-flex flex-row">
+                      <div className="mb-2">
+                        <img
+                          src={this.state.images[this.state.imgPreview].original}
+                          className="rounded"
+                          style={{ height: "265px", width: "265px" }}
+                        />
+                      </div>
+                      <div className="d-flex flex-column">
+                        <div className="ml-2">
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm btn-block"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title="Eliminar Imagen"
+                            onClick={this.deleteImage}
+                          >
+                            <i className="fa fa-trash" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                      <div className="mb-2">
+                        <div style={{ height: '265px', width: '265px', backgroundColor: '#d6d6d6', color: 'white', padding: 10, borderRadius: 4, cursor: 'pointer' }}>
+                          <h3>Preview</h3>
+                          {this.state.isUploading && (
+                            <div
+                              className="alert alert-success text-center"
+                              role="alert"
+                            >
+                              <p>
+                                <small>Cargando {this.state.progress} %</small>
+                              </p>
+                              <div>
+                                <Line
+                                  percent={this.state.progress}
+                                  strokeWidth="1"
+                                  strokeColor="#20a8d8"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          {this.state.isProcessing && (
+                            <div
+                              className="alert alert-info d-flex flex-column"
+                              role="alert"
+                            >
+                              <div className="p-2">
+                                <small>
+                                  {" "}
+                                  Procesando Imagen, espere un momento por favor...
+                            </small>
+                              </div>
+                              <div className="p-2">
+                                <HashLoader
+                                  size={15}
+                                  color={"#20a8d8"}
+                                  loading={this.state.isProcessing}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                </div>
+
+              </div>
+
+              <div className="row ml-2 mt-1 mr-2">
+                {/*Botones*/}
+                <div className="col col-sm-12">
                   <div className="d-flex flex-row mb-2">
                     <button
                       type="button"
-                      class="btn btn-info btn-sm btn-block"
-                      onClick={this.handleClose}
+                      className="btn btn-info btn-sm btn-block"
+                      onClick={this.handleSubmit}
                     >
                       Guardar
                     </button>
@@ -261,162 +436,23 @@ class ProductDetail extends Component {
                             history.push("/products");
                           }}
                         >
-                          Cancelar
+                          Regresar
                         </button>
                       )}
                     />
-
-                    {/*                    <button
-                      type="button"
-                      className="btn btn-danger btn-sm btn-block"
-                      onClick={this.handleClose}
-                    >
-                      Cancelar
-</button>*/}
-                  </div>
-                </div>
-                <div className="col col-sm-6">
-                  <div>
-                    {this.state.imgThumbnail ? (
-                      <div className="d-flex flex-row">
-                        <div className="mb-2">
-                          <img
-                            src={this.state.imgThumbnail[0].original}
-                            className="rounded"
-                            style={{ height: "280px", width: "280px" }}
-                          />
-                        </div>
-                        <div class="d-flex flex-column">
-                          <div class="p-2">
-                            <button
-                              type="button"
-                              class="btn btn-outline-secondary btn-sm btn-block"
-                              data-toggle="tooltip"
-                              data-placement="top"
-                              title="Imagen Principal"
-                              onClick={e => this.setImage(e)}
-                            >
-                              <i class="fa fa-picture-o" aria-hidden="true" />
-                            </button>
-                          </div>
-                          <div class="p-2">
-                            <button
-                              type="button"
-                              class="btn btn-outline-danger btn-sm btn-block"
-                              data-toggle="tooltip"
-                              data-placement="top"
-                              title="Eliminar Imagen"
-                            >
-                              <i class="fa fa-trash" aria-hidden="true" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mb-2">
-                        <img
-                          src="img/logo-symbol.png"
-                          style={{ height: "280px", width: "280px" }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="d-flex flex-row">
-                    {this.state.images.length > 0 ? (
-                      this.state.images.map(item => {
-                        return (
-                          <div className="mr-2">
-                            <a>
-                              <img
-                                className="rounded"
-                                style={{ height: "60px", width: "60px" }}
-                                src={item.thumbnail}
-                                id={item.id}
-                                onClick={e => this.showImage(e)}
-                              />
-                            </a>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div class="alert alert-warning" role="alert">
-                        No hay imagenes cargadas.
-                      </div>
-                    )}
-                  </div>
-                  <div class="">
-                    <div class="mt-3 mr-2">
-                      {!this.state.isUploading &&
-                        !this.state.isProcessing && (
-                          <label className="alert alert-secondary" role="alert">
-                            Cargar Imagen{" "}
-                            <i
-                              className="fa fa-cloud-upload"
-                              aria-hidden="true"
-                            />
-                            <FileUploader
-                              hidden
-                              accept="image/*"
-                              name="imgProduct"
-                              filename={item[0].id + "~" + this.nextImageID}
-                              storageRef={firebase.storage().ref("images")}
-                              onUploadStart={this.handleUploadStart}
-                              onUploadError={this.handleUploadError}
-                              onUploadSuccess={this.handleUploadSuccess}
-                              onProgress={this.handleProgress}
-                            />
-                          </label>
-                        )}
-                      {this.state.isUploading && (
-                        <div
-                          className="alert alert-success text-center"
-                          role="alert"
-                        >
-                          <p>
-                            <small>Cargando {this.state.progress} %</small>
-                          </p>
-                          <div>
-                            <Line
-                              percent={this.state.progress}
-                              strokeWidth="1"
-                              strokeColor="#20a8d8"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {this.state.isProcessing && (
-                        <div
-                          className="alert alert-info text-center"
-                          role="alert"
-                        >
-                          <p className="text-center">
-                            <small>
-                              {" "}
-                              Procesando Imagen, espere un momento por favor...
-                            </small>
-                          </p>
-                          <div>
-                            <HashLoader
-                              size={15}
-                              color={"#20a8d8"}
-                              loading={this.state.isProcessing}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
+
+
           ) : (
-            <h2>Not Found!</h2>
-          )}
+              <h2>Not Found!</h2>
+            )}
         </form>
       </div>
     );
   }
 }
 
-export default ProductDetail;
+export default Authorization(ProductDetail);

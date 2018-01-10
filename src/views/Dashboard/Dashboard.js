@@ -3,6 +3,7 @@ import firebase from '../../firebase';
 
 import ChartSales from '../../components/ChartSales';
 import ChartUsers from '../../components/ChartUsers';
+import Authorization from '../../Authorization'
 
 class Dashboard extends Component {
   constructor() {
@@ -63,7 +64,7 @@ class Dashboard extends Component {
           <div className="col-6 col-lg-3">
             <div className="card">
               <div className="card-block p-1 clearfix">
-                <i className="fa fa-puzzle-piece bg-warning p-1 font-2xl mr-1 float-left"></i>
+                <i className="fa fa-list bg-warning p-1 font-2xl mr-1 float-left"></i>
                 <div className="h5 text-warning mb-0 mt-h">{this.state.categoryCount}</div>
                 <div className="text-muted text-uppercase font-weight-bold font-xs">Categorias</div>
               </div>
@@ -93,4 +94,4 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard;
+export default Authorization(Dashboard);

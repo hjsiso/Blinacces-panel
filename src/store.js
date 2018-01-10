@@ -1,23 +1,46 @@
-import {createStore} from 'redux';
+import { createStore } from 'redux';
 
 const reducer = (state, action) => {
-    if (action.type === "SET_PRODUCT_LIST"){
+    if (action.type === "SET_PRODUCT_LIST") {
         console.log(action.type);
         console.dir(action.products);
-        return{
+        return {
             ...state,
             products: action.products
         };
-    } else if (action.type === "SET_CATEGORY_LIST"){
+    } else if (action.type === "SET_CATEGORY_LIST") {
         console.log(action.type);
         console.dir(action.categories);
-        return{
+        return {
             ...state,
             categories: action.categories
+        };
+    } else if (action.type === "SET_PRODUCT_FILTER") {
+        console.log(action.type);
+        console.dir(action.filterProducts);
+        return {
+            ...state,
+            filterProducts: action.filterProducts
+        };
+    } else if (action.type === "SET_AUTH_USER") {
+        //console.log(action.type);
+        //console.dir(action.user);
+        return {
+            ...state,
+            user: action.user
+        };
+    } else if (action.type === "SET_ADMIN_USER") {  
+        //console.log(action.type);
+        //console.dir(action.isAdmin);
+        return {
+            ...state,
+            isAdmin: action.isAdmin
         };
     }
     return state;
 }
 
 
-export default createStore(reducer, {products: [], categories: []});
+export default createStore(reducer, {
+    products: [], categories: [], filterProducts: { order: 'price', category: '', searchString: '' }, user: null, isAdmin: false
+});

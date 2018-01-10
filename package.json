@@ -31,6 +31,7 @@
     "webpack-dev-server": "^2.9.2"
   },
   "dependencies": {
+    "@blueprintjs/core": "^1.35.0",
     "bootstrap": "4.0.0-beta.2",
     "chart.js": "^2.7.0",
     "firebase": "^4.7.0",
@@ -40,6 +41,9 @@
     "lodash": "^4.17.4",
     "rc-progress": "^2.2.5",
     "react": "^16.0.0",
+    "react-addons-css-transition-group": "^15.6.2",
+    "react-alert": "^3.1.1",
+    "react-alert-template-basic": "^1.0.0",
     "react-chartjs-2": "2.6.4",
     "react-dom": "^16.0.0",
     "react-dropzone": "^4.2.3",
@@ -48,6 +52,7 @@
     "react-number-format": "^3.1.0",
     "react-router-dom": "^4.2.2",
     "react-spinners": "^0.2.5",
+    "react-toasts": "^1.2.3",
     "react-transition-group": "^2.2.1",
     "reactstrap": "^5.0.0-alpha.3",
     "redux": "^3.7.2",

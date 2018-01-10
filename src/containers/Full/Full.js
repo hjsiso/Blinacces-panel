@@ -12,6 +12,9 @@ import Orders from '../../views/Orders';
 import Customers from '../../views/Customers';
 import Categories from '../../views/Categories';
 import Products from '../../components/Products';
+import Logout from '../../components/Logout/Logout';
+
+import Authorization from '../../Authorization'
 
 class Full extends Component {
   render() {
@@ -29,6 +32,7 @@ class Full extends Component {
                 <Route path="/customers" name="Customers" component={Customers}/>
                 <Route path="/categories" name="Categories" component={Categories}/>
                 <Route path="/products" name="Products" component={Products}/>
+                <Route path="/logout" name="Logout" component={Logout}/>
                 <Redirect from="/" to="/dashboard"/>
               </Switch>
             </Container>
@@ -41,4 +45,4 @@ class Full extends Component {
   }
 }
 
-export default Full;
+export default Authorization(Full);

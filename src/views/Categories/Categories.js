@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import firebase from "../../firebase";
+import Authorization from '../../Authorization'
 
 class Categories extends Component {
   constructor() {
@@ -197,4 +198,4 @@ class Categories extends Component {
   }
 }
 
-export default Categories;
+export default Authorization(Categories);

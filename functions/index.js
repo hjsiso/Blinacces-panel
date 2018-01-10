@@ -18,7 +18,7 @@
 const functions = require('firebase-functions');
 const mkdirp = require('mkdirp-promise');
 // Include a Service Account Key to use a Signed URL
-const gcs = require('@google-cloud/storage')({keyFilename: 'blindaccesapp-firebase-adminsdk-6slth-5b8ff25c00.json'});
+const gcs = require('@google-cloud/storage')({keyFilename: 'serviceAccountKey.json'});
 const admin = require('firebase-admin');
 
 
@@ -65,6 +65,9 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
   const tempLocalOrigFile = path.join(os.tmpdir(), origFilePath);
 
   const idItemDb = fileName.slice(0, fileName.indexOf("~"));
+  let idImg = fileName.slice(fileName.indexOf("~")+1);
+  idImg = idImg.slice(0, idImg.indexOf("."));
+
 
   // Exit if this is triggered on a file that is not an image.
   if (!contentType.startsWith('image/')) {
@@ -136,8 +139,10 @@ exports.generateThumbnail = functions.storage.object().onChange(event => {
     const thumbFileUrl = thumbResult[0];
     const fileUrl = originalResult[0];
     // Add the URLs to the Database
-    const refImages = "products/" +  idItemDb + "/images";
-    return admin.database().ref(refImages).push({original: fileUrl, thumbnail: thumbFileUrl});
+    const refImages = "products/" +  idItemDb + "/images/" + idImg;
+    return admin.database().ref(refImages).update(
+       {original: fileUrl, thumbnail: thumbFileUrl}
+    );
   }).then(() => console.log('Thumbnail URLs saved to database.'));
 });
 
