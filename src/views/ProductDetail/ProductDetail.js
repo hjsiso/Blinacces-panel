@@ -17,13 +17,14 @@ class ProductDetail extends Component {
     console.dir(props);
     let product = this.getItembyId(props.match.params.id, store.getState().products)
     this.state = {
+      id: props.match.params.id,
       items: store.getState().products,
       item: props.match.params.id !== '' ? product : null,
-      name: product !== null ? product[0].name : null,
-      price: product !== null ? product[0].price : null,
-      category: product !== null ? product[0].category : null,
-      description: product !== null ? product[0].description : null,
-      outstanding: product !== null && product[0].outstanding ? product[0].outstanding : null,
+      name: props.match.params.id !== 'n' ? product[0].name : '',
+      price: props.match.params.id !== 'n' ? product[0].price : null,
+      category: props.match.params.id !== 'n' ? product[0].category : null,
+      description: props.match.params.id !== 'n' ? product[0].description : null,
+      outstanding: props.match.params.id !== 'n' && product[0].outstanding ? product[0].outstanding : null,
       imgProduct: "",
       isUploading: false,
       isProcessing: false,
@@ -61,6 +62,18 @@ class ProductDetail extends Component {
           isProcessing: false
         });
       });
+    }
+
+    if(this.state.id === 'n'){
+      let refProduct = "products/"
+      const itemsRef = firebase.database().ref(refProduct);
+      const newProductKey = itemsRef.push().key;
+      console.dir(newProductKey);
+      console.log(newProductKey); 
+      let item = [];
+      item.push({id: newProductKey});
+      console.dir(item) 
+      this.setState({item});
     }
 
   }
@@ -131,9 +144,9 @@ class ProductDetail extends Component {
     }).then(() => {
       console.log("updated");
       ToastStore.success('Los datos fueron guardados !');
-    }).error(() => {
+    }).catch((error) => {
       console.log("updated");
-      ToastStore.error('Error al guardar los datos !');
+      ToastStore.error(`${error}`);
     });
   }
 
@@ -145,7 +158,7 @@ class ProductDetail extends Component {
       <div className="animated fadeIn">
         <ToastContainer store={ToastStore} />
         <form>
-          {this.state.item.length > 0 ? (
+          {this.state.item.length > 0 || this.state.id === 'n' ? (
             <div>
               <div className="row ml-2 mt-1 mr-2">
                 <div className="col col-sm-12">
@@ -166,7 +179,7 @@ class ProductDetail extends Component {
                         className="form-control"
                         id="name"
                         name="name"
-                        defaultValue={this.state.item[0].name}
+                        defaultValue={this.state.name}
                         onChange={this.handleInputChange}
                       />
                     </div>
@@ -181,7 +194,7 @@ class ProductDetail extends Component {
                         className="form-control"
                         id="price"
                         name="price"
-                        defaultValue={this.state.item[0].price}
+                        defaultValue={this.state.price}
                         onChange={this.handleInputChange}
                       />
                     </div>
@@ -214,7 +227,7 @@ class ProductDetail extends Component {
                         {categories.map(category => {
                           return (
                             <option
-                              selected={category.id === this.state.item[0].category}
+                              selected={category.id === this.state.category}
                               key={category.id}
                               value={category.id}
                             >
@@ -233,7 +246,7 @@ class ProductDetail extends Component {
                       name="description"
                       onChange={this.handleInputChange}
                       rows="7"
-                      defaultValue={this.state.item[0].description}
+                      defaultValue={this.state.description}
                     />
                   </div>
 

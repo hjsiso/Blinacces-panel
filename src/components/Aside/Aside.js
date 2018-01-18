@@ -26,6 +26,9 @@ class Aside extends Component {
               <div className="d-flex flex-column">
                 <div className="d-flex justify-content-center p-2 mt-3"><img className="rounded-circle" style={{ height: '80px', width: '80px' }} src={this.state.user.photoURL} /></div>
                 <div className="d-flex justify-content-center p-2"><h2>{this.state.user.displayName}</h2></div>
+                <div className="d-flex justify-content-center p-2">
+                  <a href="#/logout" className="btn btn-primary">Logout</a>
+                </div>
               </div>
             </Container>
           ) : (

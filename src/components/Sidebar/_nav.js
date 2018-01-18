@@ -26,11 +26,12 @@ export default {
         variant: 'warning',
         text: 'NEW'
       }
-    },
+    }
+    /*,
     {
       name: 'Logout',
       url: '/logout',
       icon: 'icon-logout'
-    }    
+    } */   
   ]
 };

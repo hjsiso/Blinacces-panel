@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import store from '../../store';
-
+import { Route } from "react-router-dom";
 import firebase from "../../firebase";
 import NumberFormat from "react-number-format";
 import { Link } from "react-router-dom";
@@ -177,13 +177,30 @@ class ProductsList extends Component {
               <th colSpan="3">
                 <div className="container">
                   <div className="row">
+                    <div className="col col-sm-1">
+
+                      <Route
+                        render={({ history }) => (
+                          <button
+                            type="button"
+                            className="btn btn-outline-success btn-sm mr-2 float-left visible"
+                            onClick={() => {
+                              history.push("/products/n");
+                            }}
+                          >
+                            <i className="fa fa-plus-square-o" aria-hidden="true" />
+                          </button>
+                        )}
+                      />
+
+                    </div>
                     <div className="col col-sm-1">ITEMS:</div>
                     <div className="col col-sm-1">
                       <span className="badge badge-pill badge-primary">
                         {this.state.items.length}
                       </span>
                     </div>
-                    <div className="col col-sm-2">CATEGORIA:</div>
+                    <div className="col col-sm-1">CATEGORIA:</div>
                     <div className="col col-sm-2">
                       <select
                         className="form-control form-control-sm"
@@ -268,7 +285,7 @@ class ProductsList extends Component {
                           )}
                         </span>
                         {item.outstanding && (
-                         <span class="badge badge-pill badge-warning p-2 ml-2">Destacado</span>
+                          <span class="badge badge-pill badge-warning p-2 ml-2">Destacado</span>
                         )}
                       </div>
                     </div>

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import firebase from "../../firebase";
 import Authorization from '../../Authorization'
+import { ToastContainer, ToastStore } from 'react-toasts';
 
 class Categories extends Component {
   constructor() {
@@ -75,7 +76,14 @@ class Categories extends Component {
       .ref("categories/" + this.state.currentItem)
       .update({
         categoryName: this.state.categoryName
+      }).then(() => {
+        console.log("updated");
+        ToastStore.success('Los datos fueron guardados !');
+      }).catch((error) => {
+        console.log("updated");
+        ToastStore.error(`${error}`);
       });
+
     this.setState({
       currentItem: "",
       categoryName: "",
@@ -104,7 +112,13 @@ class Categories extends Component {
       categoryName: this.state.categoryName,
       visible: true
     };
-    itemsRef.push(item);
+    itemsRef.push(item).then(() => {
+      console.log("updated");
+      ToastStore.success('Los datos fueron guardados !');
+    }).catch((error) => {
+      console.log("updated");
+      ToastStore.error(`${error}`);
+    });;
     this.setState({
       categoryName: "",
       currentItem: ""
@@ -114,6 +128,7 @@ class Categories extends Component {
   render() {
     return (
       <div className="animated fadeIn">
+        <ToastContainer store={ToastStore} />
         <form className="form-inline mb-2" onSubmit={this.handleSubmit}>
           <label className="sr-only">Categoria</label>
           <input
