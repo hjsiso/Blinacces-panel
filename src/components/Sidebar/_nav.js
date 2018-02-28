@@ -4,28 +4,28 @@ export default {
       name: 'Dashboard',
       url: '/dashboard',
       icon: 'icon-speedometer',
-      badge: {
-        variant: 'info',
-        text: 'NEW'
-      }
     },
     {
       name: 'Productos',
       url: '/products',
       icon: 'icon-bag',
-      badge: {
-        variant: 'danger',
-        text: 'NEW'
-      }
     },
     {
       name: 'Categorias',
       url: '/categories',
       icon: 'icon-list',
-      badge: {
-        variant: 'warning',
-        text: 'NEW'
-      }
+    },
+    {
+      name: 'Clientes',
+      url: '/customers',
+      icon: 'fa fa-user',
+
+    },
+    {
+      name: 'Ordenes',
+      url: '/orders',
+      icon: 'fa fa-truck',
+
     }
     /*,
     {

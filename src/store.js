@@ -36,11 +36,33 @@ const reducer = (state, action) => {
             ...state,
             isAdmin: action.isAdmin
         };
+    } else if (action.type === "SET_ORDERS") {  
+        //console.log(action.type);
+        //console.dir(action.isAdmin);
+        return {
+            ...state,
+            orders: action.orders
+        };       
+    } else if (action.type === "SET_ORDERS_PENDING") {  
+        //console.log(action.type);
+        //console.dir(action.isAdmin);
+        return {
+            ...state,
+            ordersPending: action.orders
+        };
+    } else if (action.type === "SET_ORDERS_REVISED") {  
+        //console.log(action.type);
+        //console.dir(action.isAdmin);
+        return {
+            ...state,
+            ordersRevised: action.orders
+        };
     }
+    
     return state;
 }
 
 
 export default createStore(reducer, {
-    products: [], categories: [], filterProducts: { order: 'price', category: '', searchString: '' }, user: null, isAdmin: false
+    orders: [], ordersRevised: [], ordersPending: [], products: [], categories: [], filterProducts: { order: 'price', category: '', searchString: '' }, user: null, isAdmin: false
 });

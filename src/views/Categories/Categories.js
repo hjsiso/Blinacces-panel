@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import firebase from "../../firebase";
 import Authorization from '../../Authorization'
-import { ToastContainer, ToastStore } from 'react-toasts';
+//import { ToastContainer, ToastStore } from 'react-toasts';
+import { ToastContainer, toast } from 'react-toastify';
 
 class Categories extends Component {
   constructor() {
@@ -78,10 +79,14 @@ class Categories extends Component {
         categoryName: this.state.categoryName
       }).then(() => {
         console.log("updated");
-        ToastStore.success('Los datos fueron guardados !');
+        toast.success("Los datos fueron guardados !", {
+          position: toast.POSITION.BOTTOM_CENTER
+        });
       }).catch((error) => {
         console.log("updated");
-        ToastStore.error(`${error}`);
+        toast.error(`${error}`, {
+          position: toast.POSITION.BOTTOM_CENTER
+        });
       });
 
     this.setState({
@@ -114,10 +119,14 @@ class Categories extends Component {
     };
     itemsRef.push(item).then(() => {
       console.log("updated");
-      ToastStore.success('Los datos fueron guardados !');
+      toast.success("Los datos fueron guardados !", {
+        position: toast.POSITION.BOTTOM_CENTER
+      });
     }).catch((error) => {
       console.log("updated");
-      ToastStore.error(`${error}`);
+      toast.error(`${error}`, {
+        position: toast.POSITION.BOTTOM_CENTER
+      });
     });;
     this.setState({
       categoryName: "",
@@ -128,7 +137,7 @@ class Categories extends Component {
   render() {
     return (
       <div className="animated fadeIn">
-        <ToastContainer store={ToastStore} />
+        <ToastContainer autoClose={2000}/>
         <form className="form-inline mb-2" onSubmit={this.handleSubmit}>
           <label className="sr-only">Categoria</label>
           <input

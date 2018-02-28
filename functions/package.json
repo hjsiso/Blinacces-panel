@@ -6,15 +6,25 @@
     "shell": "firebase experimental:functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "lint": "eslint.js"
   },
   "dependencies": {
-    "firebase-admin": "~5.4.2",
-    "firebase-functions": "^0.7.1",
     "@google-cloud/storage": "^0.4.0",
+    "@hjsiso/mypdf-invoice": "^1.0.10",
+    "@sendgrid/mail": "^6.2.1",
     "child-process-promise": "^2.2.0",
+    "firebase-admin": "^5.8.2",
+    "firebase-functions": "^0.8.1",
+    "lodash": "^4.17.5",
+    "mailgun-js": "^0.15.0",
     "mkdirp": "^0.5.1",
-    "mkdirp-promise": "^4.0.0"
+    "mkdirp-promise": "^4.0.0",
+    "moment": "^2.20.1",
+    "nodemailer": "^4.6.0",
+    "numeral": "^2.0.6",
+    "pdf-invoice": "^1.0.2",
+    "stripe-pdf-invoice": "^2.0.3"
   },
   "private": true
 }

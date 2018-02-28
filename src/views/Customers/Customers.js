@@ -1,37 +1,73 @@
 import React, { Component } from 'react';
-
+import firebase from '../../firebase';
+import Authorization from '../../Authorization'
 
 class Customers extends Component {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            customers: null
+        }
+    }
+
+
+    componentWillMount() {
+        const itemsRef = firebase.database().ref('/');
+
+        itemsRef.child("profiles").on('value', (snapshot) => {
+            let items = snapshot.val();
+            let newState = [];
+            for (let item in items) {
+                newState.push({
+                    id: item,
+                    name: items[item].userProfile.name,
+                    email: items[item].userProfile.email,
+                    company: items[item].userProfile.company,
+                    phone: items[item].userProfile.phone,
+                    photoURL: items[item].userProfile.photoURL,
+                });
+            }
+            console.log("customers " + newState)
+            this.setState({
+                customers: newState
+            })
+        });
+    }
 
     render() {
         return (
             <table className="table table-inverse">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Username</th>
+                        <th></th>
+                        <th>Email</th>
+                        <th>Nombre</th>
+                        <th>Compañia</th>
+                        <th>Teléfono</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td colSpan="2">Larry the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
+                    {this.state.customers.map(customer => {
+                        return (
+                            <tr key={customer}>
+                                <th scope="row">
+                                    <img
+                                        src={customer.photoURL}
+                                        className="rounded"
+                                        alt={customer.name}
+                                        style={{ height: 60, width: 60 }}
+                                    />
+                                </th>
+                                <td>{customer.email}</td>
+                                <td>{customer.name}</td>
+                                <td>{customer.company}</td>
+                                <td>{customer.phone}</td>
+                            </tr>
+                        );
+                    })}
+
+
                 </tbody>
             </table>
         )
@@ -39,4 +75,4 @@ class Customers extends Component {
 
 }
 
-export default Customers;
+export default Authorization(Customers);

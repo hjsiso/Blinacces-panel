@@ -7,7 +7,8 @@ import _ from "lodash";
 import { Line } from "rc-progress";
 //import ImageGallery from "react-image-gallery";
 import { HashLoader } from "react-spinners";
-import { ToastContainer, ToastStore } from 'react-toasts';
+//import { ToastContainer, ToastStore } from 'react-toasts';
+import { ToastContainer, toast } from 'react-toastify';
 import Authorization from '../../Authorization'
 
 class ProductDetail extends Component {
@@ -25,6 +26,7 @@ class ProductDetail extends Component {
       category: props.match.params.id !== 'n' ? product[0].category : null,
       description: props.match.params.id !== 'n' ? product[0].description : null,
       outstanding: props.match.params.id !== 'n' && product[0].outstanding ? product[0].outstanding : null,
+      topost: props.match.params.id !== 'n' && product[0].topost ? product[0].topost : null,
       imgProduct: "",
       isUploading: false,
       isProcessing: false,
@@ -140,13 +142,20 @@ class ProductDetail extends Component {
       price: this.state.price,
       category: this.state.category,
       description: this.state.description,
-      outstanding: this.state.outstanding
+      outstanding: this.state.outstanding,
+      topost: this.state.topost
     }).then(() => {
       console.log("updated");
-      ToastStore.success('Los datos fueron guardados !');
+      //ToastStore.success('Los datos fueron guardados !');
+      toast.success("Los datos fueron guardados !", {
+        position: toast.POSITION.BOTTOM_CENTER
+      });
     }).catch((error) => {
       console.log("updated");
-      ToastStore.error(`${error}`);
+      //ToastStore.error(`${error}`);
+      toast.error(`${error}`, {
+        position: toast.POSITION.BOTTOM_CENTER
+      });
     });
   }
 
@@ -156,7 +165,8 @@ class ProductDetail extends Component {
 
     return (
       <div className="animated fadeIn">
-        <ToastContainer store={ToastStore} />
+        { /* <ToastContainer style={{position: 'absolute', top: 300, left: 300}} store={ToastStore} /> */}
+        <ToastContainer autoClose={2000}/>
         <form>
           {this.state.item.length > 0 || this.state.id === 'n' ? (
             <div>
@@ -249,7 +259,21 @@ class ProductDetail extends Component {
                       defaultValue={this.state.description}
                     />
                   </div>
-
+                  <div className="form-group row">
+                    <label for="name" className="col-sm-4 col-form-label">
+                      Publicar
+                    </label>
+                    <div className="col-sm-8">
+                      <input
+                        type="checkbox"
+                        className="form-control"
+                        id="topost"
+                        name="topost"
+                        checked={this.state.topost}
+                        onChange={this.handleInputChange}
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="col col-sm-6">
                   <div className="d-flex flex-row mb-2">

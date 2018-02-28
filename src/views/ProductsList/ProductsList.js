@@ -47,7 +47,8 @@ class ProductsList extends Component {
           description: items[item].description,
           price: items[item].price,
           category: items[item].category,
-          outstanding: items[item].outstanding
+          outstanding: items[item].outstanding,
+          topost: items[item].topost
         });
       }
 
@@ -170,8 +171,8 @@ class ProductsList extends Component {
 
   render() {
     return (
-      <div className="animated fadeIn">
-        <table className="table table-sm table-inverse table-striped">
+      <div className="animated fadeIn mr-2 pr-2">
+        <table className="table table-sm table-inverse table-striped mr-2">
           <thead>
             <tr>
               <th colSpan="3">
@@ -244,7 +245,7 @@ class ProductsList extends Component {
             {this.state.items.map(item => {
               return (
                 <tr key={item.id}>
-                  <td width="100px">
+                  <td>
                     <div className="mt-2">
                       {item.images && item.images[0] ? (
                         <Link to={`/products/${item.id}`}>
@@ -253,7 +254,7 @@ class ProductsList extends Component {
                             src={item.images[0].thumbnail}
                             className="rounded float-left"
                             alt={item.name}
-
+                            style={{ height: 80, width: 80 }}
                           />
                         </Link>
                       ) : (
@@ -272,7 +273,7 @@ class ProductsList extends Component {
                   <td>
                     <div className="d-flex flex-column">
                       <div className="p-2">
-                        <h4>{item.name}</h4>
+                        <h5>{item.name}</h5>
                       </div>
                       <div className="p-2">
                         <small>{item.description}</small>
@@ -290,9 +291,9 @@ class ProductsList extends Component {
                       </div>
                     </div>
                   </td>
-                  <td width="150px">
+                  <td>
                     <div className="mt-3">
-                      <h4>
+                      <h5>
                         <span className="badge badge-pill badge-primary p-2">
                           <NumberFormat
                             value={item.price}
@@ -301,7 +302,7 @@ class ProductsList extends Component {
                             prefix={"$ "}
                           />
                         </span>
-                      </h4>
+                      </h5>
                     </div>
                   </td>
                 </tr>

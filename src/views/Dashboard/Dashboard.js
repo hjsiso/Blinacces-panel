@@ -10,7 +10,9 @@ class Dashboard extends Component {
     super()
     this.state = {
       categoryCount: 0,
-      productsCount:0
+      productsCount:0,
+      customersCount: 0,
+      ordersCount: 0
     }
 
   }
@@ -31,6 +33,26 @@ class Dashboard extends Component {
         productsCount: count
       });
     });
+
+    itemsRef.child("profiles").on('value', (snapshot) => {
+      let count = snapshot.numChildren();
+      this.setState({
+        customersCount: count
+      });
+    });
+
+      let orders = itemsRef.child("orders")
+      let ordersCount = 0
+      orders.on('child_added', (snapshot) => {
+        //console.log('child_added ' +  snapshot.numChildren())
+        ordersCount = ordersCount + snapshot.numChildren();
+        this.setState({
+          ordersCount: ordersCount
+        });
+      })
+
+
+
   }
 
   render() {
@@ -41,7 +63,7 @@ class Dashboard extends Component {
             <div className="card">
               <div className="card-block p-1 clearfix">
                 <i className="fa fa-user bg-info p-1 font-2xl mr-1 float-left"></i>
-                <div className="h5 text-info mb-0 mt-h">8</div>
+                <div className="h5 text-info mb-0 mt-h">{this.state.customersCount}</div>
                 <div className="text-muted text-uppercase font-weight-bold font-xs">Clientes</div>
               </div>
               <div className="card-footer p-x-1 py-h">
@@ -53,8 +75,8 @@ class Dashboard extends Component {
             <div className="card">
               <div className="card-block p-1 clearfix">
                 <i className="fa fa-truck bg-primary p-1 font-2xl mr-1 float-left"></i>
-                <div className="h5 text-primary mb-0 mt-h">45</div>
-                <div className="text-muted text-uppercase font-weight-bold font-xs">Pedidos</div>
+                <div className="h5 text-primary mb-0 mt-h">{this.state.ordersCount}</div>
+                <div className="text-muted text-uppercase font-weight-bold font-xs">Ordenes</div>
               </div>
               <div className="card-footer p-x-1 py-h">
                 <a className="font-weight-bold font-xs btn-block text-muted" href="#/orders">Ver Más <i className="fa fa-angle-right float-right font-lg"></i></a>
